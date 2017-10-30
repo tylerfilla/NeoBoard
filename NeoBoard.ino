@@ -113,26 +113,11 @@ void setup()
 
 void loop()
 {
-    // Query input control array state
-    auto btn_up_val = digitalRead(PIN_BTN_UP);
-    auto btn_down_val = digitalRead(PIN_BTN_DOWN);
-    auto btn_left_val = digitalRead(PIN_BTN_LEFT);
-    auto btn_right_val = digitalRead(PIN_BTN_RIGHT);
-    auto btn_select_val = digitalRead(PIN_BTN_SELECT);
-
-    // Update control state
-    // LOW represents pressed with the switch configuration
+    // Query and update input control array state
     input_ctrl_g
-            .btn_up(IS_SWITCH_CLOSED(btn_up_val))
-            .btn_down(IS_SWITCH_CLOSED(btn_down_val))
-            .btn_left(IS_SWITCH_CLOSED(btn_left_val))
-            .btn_right(IS_SWITCH_CLOSED(btn_right_val))
-            .btn_select(IS_SWITCH_CLOSED(btn_select_val));
-
-    // FIXME
-    for (auto i = 0; i < 120; ++i)
-    {
-        leds_g.setPixelColor(i, 255, 255, 255);
-    }
-    leds_g.show();
+            .btn_up(IS_SWITCH_CLOSED(digitalRead(PIN_BTN_UP)))
+            .btn_down(IS_SWITCH_CLOSED(digitalRead(PIN_BTN_DOWN)))
+            .btn_left(IS_SWITCH_CLOSED(digitalRead(PIN_BTN_LEFT)))
+            .btn_right(IS_SWITCH_CLOSED(digitalRead(PIN_BTN_RIGHT)))
+            .btn_select(IS_SWITCH_CLOSED(digitalRead(PIN_BTN_SELECT)));
 }

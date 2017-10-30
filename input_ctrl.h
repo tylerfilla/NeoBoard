@@ -45,29 +45,59 @@ class input_ctrl
     bool btn_select_m;
 
 public:
+    /**
+     * Get whether the up button is pressed.
+     */
     inline bool btn_up() const
     { return btn_up_m; }
 
+    /**
+     * Indicate whether the up button is pressed.
+     */
     input_ctrl& btn_up(bool btn_up_p);
 
+    /**
+     * Get whether the down button is pressed.
+     */
     inline bool btn_down() const
     { return btn_down_m; }
 
+    /**
+     * Indicate whether the down button is pressed.
+     */
     input_ctrl& btn_down(bool btn_down_p);
 
+    /**
+     * Get whether the left button is pressed.
+     */
     inline bool btn_left() const
     { return btn_left_m; }
 
+    /**
+     * Indicate whether the left button is pressed.
+     */
     input_ctrl& btn_left(bool btn_left_p);
 
+    /**
+     * Get whether the right button is pressed.
+     */
     inline bool btn_right() const
     { return btn_right_m; }
 
+    /**
+     * Indicate whether the right button is pressed.
+     */
     input_ctrl& btn_right(bool btn_right_p);
 
+    /**
+     * Get whether the select button is pressed.
+     */
     inline bool btn_select() const
     { return btn_select_m; }
 
+    /**
+     * Indicate whether the select button is pressed.
+     */
     input_ctrl& btn_select(bool btn_select_p);
 };
 

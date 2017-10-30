@@ -20,45 +20,30 @@
 
 #include "input_ctrl.h"
 
-/**
- * Indicate that the up button was pressed.
- */
 neo::input_ctrl& neo::input_ctrl::btn_up(bool btn_up_p)
 {
     btn_up_m = btn_up_p;
     return *this;
 }
 
-/**
- * Indicate that the down button was pressed.
- */
 neo::input_ctrl& neo::input_ctrl::btn_down(bool btn_down_p)
 {
     btn_down_m = btn_down_p;
     return *this;
 }
 
-/**
- * Indicate that the left button was pressed.
- */
 neo::input_ctrl& neo::input_ctrl::btn_left(bool btn_left_p)
 {
     btn_left_m = btn_left_p;
     return *this;
 }
 
-/**
- * Indicate that the right button was pressed.
- */
 neo::input_ctrl& neo::input_ctrl::btn_right(bool btn_right_p)
 {
     btn_right_m = btn_right_p;
     return *this;
 }
 
-/**
- * Indicate that the select button was pressed.
- */
 neo::input_ctrl& neo::input_ctrl::btn_select(bool btn_select_p)
 {
     btn_select_m = btn_select_p;
