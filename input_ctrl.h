@@ -25,7 +25,8 @@ namespace neo
 {
 
 /**
- * A representation of the custom-designed input control array.
+ * A representation of the input control array (the physicall arrangement of
+ * buttons on the shield).
  */
 class input_ctrl
 {

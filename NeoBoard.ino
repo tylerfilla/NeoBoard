@@ -19,43 +19,46 @@
  */
 
 #include <Adafruit_NeoPixel.h>
+
 #include "input_ctrl.h"
+#include "mode_text.h"
+#include "mode.h"
 
 /**
  * Pin for the up directional button. Pulled up. Use a N/O switch to GND.
  */
-static constexpr auto PIN_BTN_UP = 8;
+static constexpr auto PIN_BTN_UP = 7;
 
 /**
  * Pin for the down directional button. Pulled up. Use a N/O switch to GND.
  */
-static constexpr auto PIN_BTN_DOWN = 9;
+static constexpr auto PIN_BTN_DOWN = 8;
 
 /**
  * Pin for the left directional button. Pulled up. Use a N/O switch to GND.
  */
-static constexpr auto PIN_BTN_LEFT = 10;
+static constexpr auto PIN_BTN_LEFT = 9;
 
 /**
  * Pin for the right directional button. Pulled up. Use a N/O switch to GND.
  */
-static constexpr auto PIN_BTN_RIGHT = 11;
+static constexpr auto PIN_BTN_RIGHT = 10;
 
 /**
  * Pin for the select button. Pulled up. Use a N/O switch to GND.
  */
-static constexpr auto PIN_BTN_SELECT = 12;
+static constexpr auto PIN_BTN_SELECT = 11;
 
 /**
  * Pin connected to the WS2812 LED strip data input line (5V logic, use a
  * low-ish value resistor). This daisy-chains through each panel.
  */
-static constexpr auto PIN_LED_STRIP = 13;
+static constexpr auto PIN_LED_STRIP = 12;
 
 /**
  * The number of daisy-chained LED panels.
  */
-static constexpr auto NUM_LED_PANELS = 2;
+static constexpr auto NUM_LED_PANELS = 1;
 
 /**
  * The number of WS2812 LED modules per panel.
@@ -67,26 +70,8 @@ static constexpr auto NUM_LEDS_PER_PANEL = 60;
  */
 #define IS_SWITCH_CLOSED(pin) ((pin) == LOW)
 
-/**
- * A mode of operation.
- */
-enum class mode
-{
-    /** The initial mode. */
-    STARTUP,
-
-    /** A mode for editing saved text strings. */
-    TEXT_EDIT,
-
-    /** A mode for displaying saved text strings. */
-    TEXT_VIEW,
-
-    /** ??? */
-    EASTER_EGG,
-};
-
-/** The current mode. */
-static mode current_mode_g;
+/** A reference to the current mode. */
+static neo::mode* current_mode_g;
 
 /** State for input control array. */
 static neo::input_ctrl input_ctrl_g;
@@ -97,11 +82,12 @@ static Adafruit_NeoPixel leds_g(NUM_LED_PANELS * NUM_LEDS_PER_PANEL,
 
 void setup()
 {
-    // Startup mode
-    current_mode_g = mode::STARTUP;
+    // Initialize startup mode
+    current_mode_g = new neo::mode_text;
 
-    // Initialize NeoPixel instance
+    // Initialize NeoPixel instance and clear displays
     leds_g.begin();
+    leds_g.show();
 
     // Input control array pin initialization
     pinMode(PIN_BTN_UP, INPUT_PULLUP);
@@ -120,4 +106,10 @@ void loop()
             .btn_left(IS_SWITCH_CLOSED(digitalRead(PIN_BTN_LEFT)))
             .btn_right(IS_SWITCH_CLOSED(digitalRead(PIN_BTN_RIGHT)))
             .btn_select(IS_SWITCH_CLOSED(digitalRead(PIN_BTN_SELECT)));
+
+    for (int i = 0; i < 60; ++i)
+    {
+        leds_g.setPixelColor(i, leds_g.Color(1, 0, 0));
+    }
+    leds_g.show();
 }
