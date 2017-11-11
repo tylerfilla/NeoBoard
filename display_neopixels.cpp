@@ -21,8 +21,11 @@
 #include <Adafruit_NeoPixel.h>
 #include "display_neopixels.h"
 
-neo::display_neopixels::display_neopixels(Adafruit_NeoPixel& neopixels_p)
-        : neopixels_m(neopixels_p)
+neo::display_neopixels::display_neopixels(Adafruit_NeoPixel& neopixels_p,
+    unsigned int offset_p, unsigned int width_p, unsigned int height_p)
+        : neopixels_m(neopixels_p),
+          offset_m(offset_p),
+          display_panel(width_p, height_p)
 {
 }
 
@@ -36,7 +39,8 @@ void neo::display_neopixels::flush()
     neopixels_m.show();
 }
 
-neo::display_neopixels::color_t neo::display_neopixels::get_pixel(dim_t x, dim_t y) const
+neo::display_neopixels::color_t neo::display_neopixels::get_pixel(dim_t x,
+    dim_t y) const
 {
     // Delegate to NeoPixel instance
     return neopixels_m.getPixelColor(x);

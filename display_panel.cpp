@@ -20,6 +20,12 @@
 
 #include "display_panel.h"
 
+neo::display_panel::display_panel(unsigned int width_p, unsigned int height_p)
+        : width_m(width_p),
+          height_m(height_p)
+{
+}
+
 neo::display_panel::~display_panel()
 {
 }

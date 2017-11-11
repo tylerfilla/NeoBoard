@@ -34,15 +34,33 @@ namespace neo
 class display_neopixels : public display_panel
 {
     /**
-     * The Adafruit NeoPixel control instance. This instance buffers LED states
+     * The Adafruit NeoPixel backend instance. This instance buffers LED states
      * internally.
      */
     Adafruit_NeoPixel& neopixels_m;
 
+    /**
+     * The LED strip offset.
+     */
+    unsigned int offset_m;
+
 public:
-    display_neopixels(Adafruit_NeoPixel& neopixels_p);
+    display_neopixels(Adafruit_NeoPixel& neopixels_p, unsigned int offset_p,
+        unsigned int width_p, unsigned int height_p);
 
     ~display_neopixels() override;
+
+    /**
+     * Get the Adafruit NeoPixel backend instance.
+     */
+    inline Adafruit_NeoPixel& neopixels()
+    { return neopixels_m; }
+
+    /**
+     * Get the LED strip offset.
+     */
+    inline unsigned int offset() const
+    { return offset_m; }
 
     void flush() override;
 

@@ -36,4 +36,6 @@ neo::mode_text::~mode_text()
 
 void neo::mode_text::update()
 {
+    display_m.set_pixel(0, 0, 0x00ff0000);
+    display_m.flush();
 }

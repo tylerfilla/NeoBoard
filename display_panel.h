@@ -42,8 +42,19 @@ public:
      */
     typedef uint16_t dim_t;
 
+private:
+    /**
+     * The display width.
+     */
+    unsigned int width_m;
+    
+    /**
+     * The display height.
+     */
+    unsigned int height_m;
+
 protected:
-    display_panel() = default;
+    display_panel(unsigned int width_p, unsigned int height_p);
 
     display_panel(display_panel& rhs) = default;
 
@@ -51,6 +62,18 @@ protected:
 
 public:
     virtual ~display_panel();
+    
+    /**
+     * Get the display width.
+     */
+    inline unsigned int width() const
+    { return width_m; }
+    
+    /**
+     * Get the display height.
+     */
+    inline unsigned int height() const
+    { return height_m; }
 
     /**
      * Flush all buffered updates to the physical display.

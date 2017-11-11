@@ -62,9 +62,14 @@ static constexpr auto PIN_LED_STRIP = 8;
 static constexpr auto NUM_LED_PANELS = 1;
 
 /**
- * The number of WS2812 LED modules per panel.
+ * The width of each panel.
  */
-static constexpr auto NUM_LEDS_PER_PANEL = 60;
+static constexpr auto PANEL_WIDTH = 12;
+
+/**
+ * The height of each panel.
+ */
+static constexpr auto PANEL_HEIGHT = 5;
 
 /**
  * Macro for determining if a pulled-up N/O switch is currently closed.
@@ -78,11 +83,15 @@ static neo::mode* current_mode_g;
 static neo::input_ctrl input_ctrl_g;
 
 /** State for WS2812 LED modules. */
-static Adafruit_NeoPixel leds_g(NUM_LED_PANELS * NUM_LEDS_PER_PANEL,
+static Adafruit_NeoPixel leds_g(NUM_LED_PANELS * PANEL_WIDTH * PANEL_HEIGHT,
         PIN_LED_STRIP, NEO_GRB | NEO_KHZ800);
 
 /** The first display panel. */
-static neo::display_neopixels display1_g(leds_g);
+static neo::display_neopixels display1_g(leds_g, 0, PANEL_WIDTH, PANEL_HEIGHT);
+
+/** The second display panel. */
+static neo::display_neopixels display2_g(leds_g, PANEL_WIDTH * PANEL_HEIGHT,
+    PANEL_WIDTH, PANEL_HEIGHT);
 
 void setup()
 {
@@ -112,7 +121,9 @@ void loop()
             .btn_right(IS_SWITCH_CLOSED(digitalRead(PIN_BTN_RIGHT)))
             .btn_select(IS_SWITCH_CLOSED(digitalRead(PIN_BTN_SELECT)));
 
-    // FIXME
-    display1_g.set_pixel(0, 0, 0x00ff0000);
-    display1_g.flush();
+    // Update the current mode
+    if (current_mode_g)
+    {
+        current_mode_g->update();
+    }
 }
