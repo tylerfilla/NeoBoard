@@ -18,22 +18,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PIXELY_FONT_H
-#define PIXELY_FONT_H
+#include <Adafruit_NeoPixel.h>
+#include "display_neopixels.h"
 
-namespace neo
+neo::display_neopixels::display_neopixels(Adafruit_NeoPixel& neopixels_p)
+        : neopixels_m(neopixels_p)
 {
+}
 
-namespace font
+neo::display_neopixels::~display_neopixels()
 {
+}
 
-/**
- * The default (and only) font.
- */
-extern const unsigned char pixely[128][3];
+void neo::display_neopixels::flush()
+{
+    // Read the buffer out to the LEDs
+    neopixels_m.show();
+}
 
-} // namespace font
+neo::display_neopixels::color_t neo::display_neopixels::get_pixel(dim_t x, dim_t y) const
+{
+    // Delegate to NeoPixel instance
+    return neopixels_m.getPixelColor(x);
+}
 
-} // namespace neo
+void neo::display_neopixels::set_pixel(dim_t x, dim_t y, color_t color)
+{
+    // Delegate to NeoPixel instance
+    neopixels_m.setPixelColor(x, color);
+}
 
-#endif // #ifndef PIXELY_FONT_H
+// TODO: Add 2D support

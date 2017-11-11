@@ -18,22 +18,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PIXELY_FONT_H
-#define PIXELY_FONT_H
+#include "display_panel.h"
 
-namespace neo
+neo::display_panel::~display_panel()
 {
-
-namespace font
-{
-
-/**
- * The default (and only) font.
- */
-extern const unsigned char pixely[128][3];
-
-} // namespace font
-
-} // namespace neo
-
-#endif // #ifndef PIXELY_FONT_H
+}

@@ -1,5 +1,5 @@
 /*
- * NeoBoardV2 - LED Panel Controller
+ * NeoBoard - LED Panel Controller
  * Dedicated to FIRST Tech Challenge team #5703
  *
  * Copyright (c) 2017 Tyler Filla

@@ -1,5 +1,5 @@
 /*
- * NeoBoardV2 - LED Panel Controller
+ * NeoBoard - LED Panel Controller
  * Dedicated to FIRST Tech Challenge team #5703
  *
  * Copyright (c) 2017 Tyler Filla
@@ -20,7 +20,17 @@
 
 #include "mode_text.h"
 
-neo::mode_text::mode_text()
+neo::mode_text::mode_text(display_panel& display_p)
+        : display_m(display_p)
+{
+}
+
+neo::mode_text::mode_text(mode_text& rhs)
+        : display_m(rhs.display_m)
+{
+}
+
+neo::mode_text::~mode_text()
 {
 }
 

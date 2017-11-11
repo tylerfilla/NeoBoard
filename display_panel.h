@@ -18,41 +18,56 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MODE_TEXT_H
-#define MODE_TEXT_H
+#ifndef DISPLAY_PANEL_H
+#define DISPLAY_PANEL_H
 
-#include "display_panel.h"
-#include "effect_text.h"
-#include "mode.h"
+#include <stdint.h>
 
 namespace neo
 {
 
 /**
- * A mode for displaying and editing text.
+ * A representation of a physical display panel.
  */
-class mode_text : public mode
+class display_panel
 {
+public:
     /**
-     * The display panel.
+     * A pixel color.
      */
-    display_panel& display_m;
+    typedef uint32_t color_t;
 
     /**
-     * The currently displayed text.
+     * A dimension value.
      */
-    effect_text text_m;
+    typedef uint16_t dim_t;
+
+protected:
+    display_panel() = default;
+
+    display_panel(display_panel& rhs) = default;
+
+    display_panel(display_panel&& rhs) = default;
 
 public:
-    explicit mode_text(display_panel& display_p);
+    virtual ~display_panel();
 
-    mode_text(mode_text& rhs);
+    /**
+     * Flush all buffered updates to the physical display.
+     */
+    virtual void flush() = 0;
 
-    ~mode_text() override;
+    /**
+     * Get the color of a particular pixel.
+     */
+    virtual color_t get_pixel(dim_t x, dim_t y) const = 0;
 
-    void update() override;
+    /**
+     * Set the color of a particular pixel. Not required to update immediately.
+     */
+    virtual void set_pixel(dim_t x, dim_t y,  color_t color) = 0;
 };
 
 } // namespace neo
 
-#endif // #ifndef MODE_TEXT_H
+#endif // #ifndef DISPLAY_PANEL_H

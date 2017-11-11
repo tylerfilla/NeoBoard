@@ -18,22 +18,36 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PIXELY_FONT_H
-#define PIXELY_FONT_H
+#ifndef EFFECT_TEXT_H
+#define EFFECT_TEXT_H
 
 namespace neo
 {
 
-namespace font
-{
-
 /**
- * The default (and only) font.
+ * A special text string that supports spans of character effects.
  */
-extern const unsigned char pixely[128][3];
+class effect_text
+{
+    /**
+     * The raw text content.
+     */
+    const char* raw_text_m;
 
-} // namespace font
+public:
+    effect_text();
+
+    effect_text(const char* raw_text_p);
+
+    ~effect_text();
+
+    /**
+     * Get the raw text content.
+     */
+    inline const char* raw_text() const
+    { return raw_text_m; }
+};
 
 } // namespace neo
 
-#endif // #ifndef PIXELY_FONT_H
+#endif // #ifndef EFFECT_TEXT_H

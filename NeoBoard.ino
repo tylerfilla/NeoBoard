@@ -1,5 +1,5 @@
 /*
- * NeoBoardV2 - LED Panel Controller
+ * NeoBoard - LED Panel Controller
  * Dedicated to FIRST Tech Challenge team #5703
  *
  * Copyright (c) 2017 Tyler Filla
@@ -20,6 +20,7 @@
 
 #include <Adafruit_NeoPixel.h>
 
+#include "display_neopixels.h"
 #include "input_ctrl.h"
 #include "mode_text.h"
 #include "mode.h"
@@ -80,10 +81,14 @@ static neo::input_ctrl input_ctrl_g;
 static Adafruit_NeoPixel leds_g(NUM_LED_PANELS * NUM_LEDS_PER_PANEL,
         PIN_LED_STRIP, NEO_GRB | NEO_KHZ800);
 
+/** The first display panel. */
+static neo::display_neopixels display1_g(leds_g);
+
 void setup()
 {
     // Initialize startup mode
-    current_mode_g = new neo::mode_text;
+    // TODO: Add support for multiple displays
+    current_mode_g = new neo::mode_text(display1_g);
 
     // Initialize NeoPixel instance and clear displays
     leds_g.begin();
@@ -107,9 +112,7 @@ void loop()
             .btn_right(IS_SWITCH_CLOSED(digitalRead(PIN_BTN_RIGHT)))
             .btn_select(IS_SWITCH_CLOSED(digitalRead(PIN_BTN_SELECT)));
 
-    // Update the current mode, if available
-    if (current_mode_g)
-    {
-        current_mode_g->update();
-    }
+    // FIXME
+    display1_g.set_pixel(0, 0, 0x00ff0000);
+    display1_g.flush();
 }

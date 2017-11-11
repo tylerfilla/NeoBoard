@@ -18,22 +18,39 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PIXELY_FONT_H
-#define PIXELY_FONT_H
+#ifndef DISPLAY_NEOPIXELS_H
+#define DISPLAY_NEOPIXELS_H
+
+#include "display_panel.h"
+
+class Adafruit_NeoPixel;
 
 namespace neo
 {
 
-namespace font
-{
-
 /**
- * The default (and only) font.
+ * A display panel based on Adafruit NeoPixel-compatible LED strips.
  */
-extern const unsigned char pixely[128][3];
+class display_neopixels : public display_panel
+{
+    /**
+     * The Adafruit NeoPixel control instance. This instance buffers LED states
+     * internally.
+     */
+    Adafruit_NeoPixel& neopixels_m;
 
-} // namespace font
+public:
+    display_neopixels(Adafruit_NeoPixel& neopixels_p);
+
+    ~display_neopixels() override;
+
+    void flush() override;
+
+    color_t get_pixel(dim_t x, dim_t y) const override;
+
+    void set_pixel(dim_t x, dim_t y,  color_t color) override;
+};
 
 } // namespace neo
 
-#endif // #ifndef PIXELY_FONT_H
+#endif // #ifndef DISPLAY_NEOPIXELS_H
