@@ -20,6 +20,10 @@
 
 #include "mode_text.h"
 
+neo::mode_text::mode_text()
+{
+}
+
 void neo::mode_text::update()
 {
 }

@@ -18,26 +18,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MODE_H
-#define MODE_H
+#ifndef PIXELY_FONT_H
+#define PIXELY_FONT_H
 
 namespace neo
 {
 
-/**
- * A mode of operation.
- */
-class mode
+namespace font
 {
-public:
-    virtual ~mode() = default;
 
-    /**
-     * Update the mode.
-     */
-    virtual void update() = 0;
-};
+/**
+ * The default (and only) font.
+ */
+extern const unsigned char pixely[128][3];
+
+} // namespace font
 
 } // namespace neo
 
-#endif // #ifndef MODE_H
+#endif // #ifndef PIXELY_FONT_H

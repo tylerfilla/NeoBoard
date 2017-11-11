@@ -27,17 +27,17 @@
 /**
  * Pin for the up directional button. Pulled up. Use a N/O switch to GND.
  */
-static constexpr auto PIN_BTN_UP = 7;
+static constexpr auto PIN_BTN_UP = 11;
 
 /**
  * Pin for the down directional button. Pulled up. Use a N/O switch to GND.
  */
-static constexpr auto PIN_BTN_DOWN = 8;
+static constexpr auto PIN_BTN_DOWN = 12;
 
 /**
  * Pin for the left directional button. Pulled up. Use a N/O switch to GND.
  */
-static constexpr auto PIN_BTN_LEFT = 9;
+static constexpr auto PIN_BTN_LEFT = 13;
 
 /**
  * Pin for the right directional button. Pulled up. Use a N/O switch to GND.
@@ -47,13 +47,13 @@ static constexpr auto PIN_BTN_RIGHT = 10;
 /**
  * Pin for the select button. Pulled up. Use a N/O switch to GND.
  */
-static constexpr auto PIN_BTN_SELECT = 11;
+static constexpr auto PIN_BTN_SELECT = 9;
 
 /**
  * Pin connected to the WS2812 LED strip data input line (5V logic, use a
  * low-ish value resistor). This daisy-chains through each panel.
  */
-static constexpr auto PIN_LED_STRIP = 12;
+static constexpr auto PIN_LED_STRIP = 8;
 
 /**
  * The number of daisy-chained LED panels.
@@ -107,9 +107,9 @@ void loop()
             .btn_right(IS_SWITCH_CLOSED(digitalRead(PIN_BTN_RIGHT)))
             .btn_select(IS_SWITCH_CLOSED(digitalRead(PIN_BTN_SELECT)));
 
-    for (int i = 0; i < 60; ++i)
+    // Update the current mode, if available
+    if (current_mode_g)
     {
-        leds_g.setPixelColor(i, leds_g.Color(1, 0, 0));
+        current_mode_g->update();
     }
-    leds_g.show();
 }

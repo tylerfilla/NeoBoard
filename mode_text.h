@@ -32,7 +32,13 @@ namespace neo
 class mode_text : public mode
 {
 public:
-    void update();
+    mode_text();
+
+    mode_text(mode_text& rhs) = default;
+
+    ~mode_text() override = default;
+
+    void update() override;
 };
 
 } // namespace neo
