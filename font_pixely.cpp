@@ -20,7 +20,7 @@
 
 //
 // This is a font primarily custom-made, but with some small influences from
-// the public domain. It is regular weight, monospaced, and with 4x3 ASCII
+// the public domain. It is regular weight, monospaced, and with 3x5 ASCII
 // 7-bit printable characters.
 //
 
