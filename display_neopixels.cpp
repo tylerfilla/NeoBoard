@@ -22,7 +22,7 @@
 #include "display_neopixels.h"
 
 #define MAP2D(offset, width, x, y) ((offset) + ((y) % 2 ? (width) - (x) - 1 : \
-    (x)) % (width) + y * (width))
+    (x)) % (width) + (y) * (width))
 
 neo::display_neopixels::display_neopixels(Adafruit_NeoPixel& neopixels_p,
     unsigned int offset_p, unsigned int width_p, unsigned int height_p)
