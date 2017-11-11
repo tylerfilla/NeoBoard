@@ -42,7 +42,7 @@ public:
      */
     typedef uint16_t dim_t;
 
-private:
+protected:
     /**
      * The display width.
      */
@@ -53,7 +53,6 @@ private:
      */
     unsigned int height_m;
 
-protected:
     display_panel(unsigned int width_p, unsigned int height_p);
 
     display_panel(display_panel& rhs) = default;

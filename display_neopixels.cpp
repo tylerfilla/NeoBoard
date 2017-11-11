@@ -21,11 +21,14 @@
 #include <Adafruit_NeoPixel.h>
 #include "display_neopixels.h"
 
+#define MAP2D(offset, width, x, y) ((offset) + ((y) % 2 ? (width) - (x) - 1 : \
+    (x)) % (width) + y * (width))
+
 neo::display_neopixels::display_neopixels(Adafruit_NeoPixel& neopixels_p,
     unsigned int offset_p, unsigned int width_p, unsigned int height_p)
-        : neopixels_m(neopixels_p),
-          offset_m(offset_p),
-          display_panel(width_p, height_p)
+        : display_panel(width_p, height_p),
+          neopixels_m(neopixels_p),
+          offset_m(offset_p)
 {
 }
 
@@ -43,13 +46,11 @@ neo::display_neopixels::color_t neo::display_neopixels::get_pixel(dim_t x,
     dim_t y) const
 {
     // Delegate to NeoPixel instance
-    return neopixels_m.getPixelColor(x);
+    return neopixels_m.getPixelColor(MAP2D(offset_m, width_m, x, y));
 }
 
 void neo::display_neopixels::set_pixel(dim_t x, dim_t y, color_t color)
 {
     // Delegate to NeoPixel instance
-    neopixels_m.setPixelColor(x, color);
+    neopixels_m.setPixelColor(MAP2D(offset_m, width_m, x, y), color);
 }
-
-// TODO: Add 2D support
