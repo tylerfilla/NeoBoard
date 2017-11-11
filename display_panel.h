@@ -75,6 +75,11 @@ public:
     { return height_m; }
 
     /**
+     * Clear the buffer, but not the physical display.
+     */
+    virtual void clear() = 0;
+
+    /**
      * Flush all buffered updates to the physical display.
      */
     virtual void flush() = 0;

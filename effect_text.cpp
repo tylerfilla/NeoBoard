@@ -21,11 +21,7 @@
 #include "effect_text.h"
 
 neo::effect_text::effect_text()
-{
-}
-
-neo::effect_text::effect_text(const char* raw_text_p)
-        : raw_text_m(raw_text_p)
+        : text_m("SOUP")
 {
 }
 

@@ -62,6 +62,8 @@ public:
     inline unsigned int offset() const
     { return offset_m; }
 
+    void clear() override;
+
     void flush() override;
 
     color_t get_pixel(dim_t x, dim_t y) const override;

@@ -36,6 +36,12 @@ neo::display_neopixels::~display_neopixels()
 {
 }
 
+void neo::display_neopixels::clear()
+{
+    // Delegate to NeoPixel instance
+    neopixels_m.clear();
+}
+
 void neo::display_neopixels::flush()
 {
     // Read the buffer out to the LEDs

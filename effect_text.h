@@ -32,20 +32,18 @@ class effect_text
     /**
      * The raw text content.
      */
-    const char* raw_text_m;
+    char* text_m;
 
 public:
     effect_text();
-
-    effect_text(const char* raw_text_p);
 
     ~effect_text();
 
     /**
      * Get the raw text content.
      */
-    inline const char* raw_text() const
-    { return raw_text_m; }
+    inline char* text() const
+    { return text_m; }
 };
 
 } // namespace neo
