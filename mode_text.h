@@ -21,8 +21,6 @@
 #ifndef MODE_TEXT_H
 #define MODE_TEXT_H
 
-#include "display_panel.h"
-#include "input_ctrl.h"
 #include "effect_text.h"
 #include "mode.h"
 
@@ -35,26 +33,12 @@ namespace neo
 class mode_text : public mode
 {
     /**
-     * The input control array.
-     */
-    input_ctrl& ctrl_m;
-
-    /**
-     * The display panel.
-     */
-    display_panel& display_m;
-
-    /**
      * The currently displayed text.
      */
     effect_text text_m;
 
 public:
-    mode_text(input_ctrl& ctrl_p, display_panel& display_p);
-
-    mode_text(mode_text& rhs);
-
-    ~mode_text() override;
+    mode_text(input_ctrl& input_p, display_pair& displays_p);
 
     void update() override;
 };

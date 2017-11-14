@@ -18,44 +18,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MODE_H
-#define MODE_H
+#include "mode.h"
 
-namespace neo
+neo::mode::mode(input_ctrl& input_p, display_pair& displays_p)
+        : displays_m(displays_p),
+          input_m(input_p)
 {
-
-class display_pair;
-class input_ctrl;
-
-/**
- * A mode of operation.
- */
-class mode
-{
-protected:
-    /**
-     * The target display group.
-     */
-    display_pair& displays_m;
-
-    /**
-     * The input control array.
-     */
-    input_ctrl& input_m;
-
-    mode(input_ctrl& input_p, display_pair& displays_p);
-
-    mode(mode& mode_p);
-
-public:
-    virtual ~mode() = default;
-
-    /**
-     * Update the mode.
-     */
-    virtual void update() = 0;
-};
-
-} // namespace neo
-
-#endif // #ifndef MODE_H
+}

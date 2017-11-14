@@ -18,44 +18,41 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MODE_H
-#define MODE_H
+#ifndef DISPLAY_PAIR_H
+#define DISPLAY_PAIR_H
 
 namespace neo
 {
 
-class display_pair;
-class input_ctrl;
+class display_panel;
 
 /**
- * A mode of operation.
+ * A planar display surface built from 2 display panels, because that's all I
+ * have to deal with here. The displays can be rearranged, flipped, and
+ * rotated.
  */
-class mode
+class display_pair
 {
-protected:
     /**
-     * The target display group.
+     * The first display panel.
      */
-    display_pair& displays_m;
+    display_panel& panel1_m;
 
     /**
-     * The input control array.
+     * The second display panel.
      */
-    input_ctrl& input_m;
-
-    mode(input_ctrl& input_p, display_pair& displays_p);
-
-    mode(mode& mode_p);
+    display_panel& panel2_m;
 
 public:
-    virtual ~mode() = default;
+    display_pair(display_panel& panel1_p, display_panel& panel2_p);
 
-    /**
-     * Update the mode.
-     */
-    virtual void update() = 0;
+    inline display_panel& panel1()
+    { return panel1_m; }
+
+    inline display_panel& panel2()
+    { return panel2_m; }
 };
 
 } // namespace neo
 
-#endif // #ifndef MODE_H
+#endif // #ifndef DISPLAY_PAIR_H

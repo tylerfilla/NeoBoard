@@ -20,31 +20,18 @@
 
 #include <string.h>
 
+#include "display_pair.h"
+#include "display_panel.h"
 #include "font_pixely.h"
 #include "mode_text.h"
 
-neo::mode_text::mode_text(input_ctrl& ctrl_p, display_panel& display_p)
-        : ctrl_m(ctrl_p),
-          display_m(display_p)
-{
-}
-
-neo::mode_text::mode_text(mode_text& rhs)
-        : ctrl_m(rhs.ctrl_m),
-          display_m(rhs.display_m)
-{
-}
-
-neo::mode_text::~mode_text()
+neo::mode_text::mode_text(input_ctrl& input_p, display_pair& displays_p)
+        : mode(input_p, displays_p)
 {
 }
 
 void neo::mode_text::update()
 {
-    // Clear the display
-    //display_m.clear();
-    //display_m.flush();
-
     auto text = text_m.text();
 
     for (size_t i = 0; i < strlen(text); ++i)
@@ -62,11 +49,17 @@ void neo::mode_text::update()
                 // Set pixel per the bitmap cell
                 if ((column_data >> row) & 0x1)
                 {
-                    display_m.set_pixel(i * 3 + column, 4 - row, i % 2 ? 0x00ff0000 : 0x0000ff00);
+                    //display_m.set_pixel(i * 3 + column, 4 - row, i % 2 ? 0x00ff4000 : 0x00ff0000);
                 }
+                else
+                {
+                    //display_m.set_pixel(i * 3 + column, 4 - row, 0x00000010);
+                }
+
+                displays_m.panel1().set_pixel(i * 3 + column, 4 - row, 0x00ffffff);
             }
         }
     }
 
-    display_m.flush();
+    displays_m.panel1().flush();
 }

@@ -18,44 +18,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MODE_H
-#define MODE_H
+#include "display_pair.h"
 
-namespace neo
+neo::display_pair::display_pair(display_panel& panel1_p, display_panel& panel2_p)
+        : panel1_m(panel1_p),
+          panel2_m(panel2_p)
 {
-
-class display_pair;
-class input_ctrl;
-
-/**
- * A mode of operation.
- */
-class mode
-{
-protected:
-    /**
-     * The target display group.
-     */
-    display_pair& displays_m;
-
-    /**
-     * The input control array.
-     */
-    input_ctrl& input_m;
-
-    mode(input_ctrl& input_p, display_pair& displays_p);
-
-    mode(mode& mode_p);
-
-public:
-    virtual ~mode() = default;
-
-    /**
-     * Update the mode.
-     */
-    virtual void update() = 0;
-};
-
-} // namespace neo
-
-#endif // #ifndef MODE_H
+}

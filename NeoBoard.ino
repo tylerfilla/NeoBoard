@@ -21,6 +21,7 @@
 #include <Adafruit_NeoPixel.h>
 
 #include "display_neopixels.h"
+#include "display_pair.h"
 #include "input_ctrl.h"
 #include "mode_text.h"
 #include "mode.h"
@@ -57,11 +58,6 @@ static constexpr auto PIN_BTN_SELECT = 9;
 static constexpr auto PIN_LED_STRIP = 8;
 
 /**
- * The number of daisy-chained LED panels.
- */
-static constexpr auto NUM_LED_PANELS = 1;
-
-/**
  * The width of each panel.
  */
 static constexpr auto PANEL_WIDTH = 12;
@@ -83,7 +79,7 @@ static neo::mode* current_mode_g;
 static neo::input_ctrl input_ctrl_g;
 
 /** State for WS2812 LED modules. */
-static Adafruit_NeoPixel leds_g(NUM_LED_PANELS * PANEL_WIDTH * PANEL_HEIGHT,
+static Adafruit_NeoPixel leds_g(2 * PANEL_WIDTH * PANEL_HEIGHT,
         PIN_LED_STRIP, NEO_GRB | NEO_KHZ800);
 
 /** The first display panel. */
@@ -93,11 +89,14 @@ static neo::display_neopixels display1_g(leds_g, 0, PANEL_WIDTH, PANEL_HEIGHT);
 static neo::display_neopixels display2_g(leds_g, PANEL_WIDTH * PANEL_HEIGHT,
     PANEL_WIDTH, PANEL_HEIGHT);
 
+/** A pairwise arrangement of both display panels. */
+static neo::display_pair displays_g(display1_g, display2_g);
+
 void setup()
 {
     // Initialize startup mode
     // TODO: Add support for multiple displays
-    current_mode_g = new neo::mode_text(input_ctrl_g, display1_g);
+    current_mode_g = new neo::mode_text(input_ctrl_g, displays_g);
 
     // Initialize NeoPixel instance and clear displays
     leds_g.begin();

@@ -21,7 +21,7 @@
 #include "effect_text.h"
 
 neo::effect_text::effect_text()
-        : text_m("SOUP")
+        : text_m("TEST")
 {
 }
 
