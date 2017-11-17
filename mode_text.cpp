@@ -32,12 +32,10 @@ neo::mode_text::mode_text(input_ctrl& input_p, display_pair& displays_p)
 
 void neo::mode_text::update()
 {
-    auto text = text_m.text();
-
-    for (size_t i = 0; i < strlen(text); ++i)
+    for (size_t ci = 0; ci < text_len_m; ++ci)
     {
         // Get character bitmap data
-        auto ch = neo::font::pixely[(size_t) text[i]];
+        auto ch = neo::font::pixely[static_cast<size_t>(text_m[ci])];
 
         for (int column = 0; column < 3; ++column)
         {
@@ -49,17 +47,16 @@ void neo::mode_text::update()
                 // Set pixel per the bitmap cell
                 if ((column_data >> row) & 0x1)
                 {
-                    //display_m.set_pixel(i * 3 + column, 4 - row, i % 2 ? 0x00ff4000 : 0x00ff0000);
+                    displays_m.set_pixel(ci * 3 + column, 4 - row, ci % 2 ? 0x00ff4000 : 0x00ff0000);
                 }
                 else
                 {
-                    //display_m.set_pixel(i * 3 + column, 4 - row, 0x00000010);
+                    displays_m.set_pixel(ci * 3 + column, 4 - row, 0x00000010);
                 }
-
-                displays_m.panel1().set_pixel(i * 3 + column, 4 - row, 0x00ffffff);
             }
         }
     }
 
-    displays_m.panel1().flush();
+    // Update drawing surface
+    displays_m.surface_flush();
 }

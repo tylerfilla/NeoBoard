@@ -21,24 +21,38 @@
 #ifndef MODE_TEXT_H
 #define MODE_TEXT_H
 
-#include "effect_text.h"
 #include "mode.h"
+
+#define TEXT_BUFFER_SIZE 512
 
 namespace neo
 {
 
 /**
- * A mode for displaying and editing text.
+ * A mode for displaying and editing text. No internationalization efforts are
+ * made whatsoever.
  */
 class mode_text : public mode
 {
     /**
-     * The currently displayed text.
+     * The active text buffer. Plain ol' ASCII with some special in-band
+     * formatting sequences for your viewing pleasure. Not null-terminated.
      */
-    effect_text text_m;
+    char text_m[TEXT_BUFFER_SIZE];
+
+    /**
+     * The length of the text string currently active in the buffer.
+     */
+    size_t text_len_m;
 
 public:
     mode_text(input_ctrl& input_p, display_pair& displays_p);
+
+    inline const char* text() const
+    { return text_m; }
+
+    inline size_t text_len() const
+    { return text_len_m; }
 
     void update() override;
 };

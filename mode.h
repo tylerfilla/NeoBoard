@@ -48,8 +48,6 @@ protected:
     mode(mode& mode_p);
 
 public:
-    virtual ~mode() = default;
-
     /**
      * Update the mode.
      */

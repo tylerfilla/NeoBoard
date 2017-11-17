@@ -21,18 +21,23 @@
 #ifndef DISPLAY_PAIR_H
 #define DISPLAY_PAIR_H
 
+#include "display_panel.h"
+
 namespace neo
 {
 
-class display_panel;
-
 /**
  * A planar display surface built from 2 display panels, because that's all I
- * have to deal with here. The displays can be rearranged, flipped, and
- * rotated.
+ * have to deal with here. The displays can be swapped for flexibility in
+ * physical mounting.
  */
 class display_pair
 {
+public:
+    using color_t = neo::display_panel::color_t;
+    using dim_t = neo::display_panel::dim_t;
+
+private:
     /**
      * The first display panel.
      */
@@ -43,6 +48,26 @@ class display_pair
      */
     display_panel& panel2_m;
 
+    /**
+     * Whether the display panels are swapped. Normally panel 1 is said to be
+     * the "before" panel (e.g. when displaying text) and 2 the "after" panel.
+     * When swapped, 2 comes before 1.
+     */
+    bool swapped_m;
+
+    /**
+     * Whether the display panels are vertically stacked. Normally panel 1 is
+     * to the left of panel 2 (when not swapped). Stacking places panel 1
+     * normally above panel 2 (vice-versa when swapped).
+     */
+    bool stacked_m;
+
+    /**
+     * Get whichever panel has the given point on the drawing surface.
+     */
+    display_panel& panel_for_point(dim_t x, dim_t y, dim_t& out_px,
+        dim_t& out_py);
+
 public:
     display_pair(display_panel& panel1_p, display_panel& panel2_p);
 
@@ -51,6 +76,68 @@ public:
 
     inline display_panel& panel2()
     { return panel2_m; }
+
+    inline bool swapped() const
+    { return swapped_m; }
+
+    inline bool stacked() const
+    { return stacked_m; }
+
+    /**
+     * Get whichever panel logically comes first (the "before" panel).
+     */
+    inline display_panel& panel_before()
+    { return swapped_m ? panel2_m : panel1_m; }
+
+    /**
+     * Get whichever panel logically comes second (the "after" panel).
+     */
+    inline display_panel& panel_after()
+    { return swapped_m ? panel1_m : panel2_m; }
+
+    /**
+     * Swap (or un..swap?) the panels' logical order.
+     */
+    inline void swap()
+    {
+        swapped_m = !swapped_m;
+    }
+
+    /**
+     * Toggle the vertically-stacked state of the panels.
+     */
+    inline void stack()
+    {
+        stacked_m = !stacked_m;
+    }
+
+    /**
+     * Clear the drawing surface.
+     */
+    inline void surface_clear()
+    {
+        panel1_m.clear();
+        panel2_m.clear();
+    }
+
+    /**
+     * Flush all buffered updates to the drawing surface.
+     */
+    inline void surface_flush()
+    {
+        panel1_m.flush();
+        panel2_m.flush();
+    }
+
+    /**
+     * Get the color of a particular pixel on the drawing surface.
+     */
+    color_t get_pixel(dim_t x, dim_t y) const;
+
+    /**
+     * Set the color of a particular pixel on the drawing surface.
+     */
+    void set_pixel(dim_t x, dim_t y, color_t color);
 };
 
 } // namespace neo

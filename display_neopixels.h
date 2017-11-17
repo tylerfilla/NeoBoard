@@ -48,8 +48,6 @@ public:
     display_neopixels(Adafruit_NeoPixel& neopixels_p, unsigned int offset_p,
         unsigned int width_p, unsigned int height_p);
 
-    ~display_neopixels() override;
-
     /**
      * Get the Adafruit NeoPixel backend instance.
      */

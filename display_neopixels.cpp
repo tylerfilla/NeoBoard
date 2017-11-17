@@ -32,10 +32,6 @@ neo::display_neopixels::display_neopixels(Adafruit_NeoPixel& neopixels_p,
 {
 }
 
-neo::display_neopixels::~display_neopixels()
-{
-}
-
 void neo::display_neopixels::clear()
 {
     // Delegate to NeoPixel instance

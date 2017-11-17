@@ -55,13 +55,7 @@ protected:
 
     display_panel(unsigned int width_p, unsigned int height_p);
 
-    display_panel(display_panel& rhs) = default;
-
-    display_panel(display_panel&& rhs) = default;
-
 public:
-    virtual ~display_panel();
-    
     /**
      * Get the display width.
      */

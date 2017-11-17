@@ -95,7 +95,6 @@ static neo::display_pair displays_g(display1_g, display2_g);
 void setup()
 {
     // Initialize startup mode
-    // TODO: Add support for multiple displays
     current_mode_g = new neo::mode_text(input_ctrl_g, displays_g);
 
     // Initialize NeoPixel instance and clear displays
