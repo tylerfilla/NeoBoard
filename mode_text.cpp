@@ -26,23 +26,25 @@
 #include "mode_text.h"
 
 neo::mode_text::mode_text(input_ctrl& input_p, display_pair& displays_p)
-        : mode(input_p, displays_p)
+        : mode(input_p, displays_p), text_m{"MEEPMEEP"}, text_len_m(8)
 {
 }
 
 void neo::mode_text::update()
 {
+    namespace font = neo::font::pixely;
+
     for (size_t ci = 0; ci < text_len_m; ++ci)
     {
         // Get character bitmap data
-        auto ch = neo::font::pixely[static_cast<size_t>(text_m[ci])];
+        auto ch = font::data[static_cast<size_t>(text_m[ci])];
 
-        for (int column = 0; column < 3; ++column)
+        for (int column = 0; column < font::width; ++column)
         {
             // Get column data
             auto column_data = ch[column];
 
-            for (int row = 0; row < 5; ++row)
+            for (int row = 0; row < font::height; ++row)
             {
                 // Set pixel per the bitmap cell
                 if ((column_data >> row) & 0x1)

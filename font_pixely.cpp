@@ -26,7 +26,11 @@
 
 #include "font_pixely.h"
 
-const unsigned char neo::font::pixely[128][3] = {
+const int neo::font::pixely::height = 5;
+
+const int neo::font::pixely::width = 3;
+
+const unsigned char neo::font::pixely::data[128][3] = {
     { 0x00, 0x00, 0x00 },
     { 0x00, 0x00, 0x00 },
     { 0x00, 0x00, 0x00 },

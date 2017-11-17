@@ -30,7 +30,25 @@ namespace font
 /**
  * The default (and only) font.
  */
-extern const unsigned char pixely[128][3];
+namespace pixely
+{
+
+/**
+ * Height for pixely.
+ */
+extern const int height;
+
+/**
+ * Width for pixely.
+ */
+extern const int width;
+
+/**
+ * Font data for pixely.
+ */
+extern const unsigned char data[128][3];
+
+} // namespace pixely
 
 } // namespace font
 
