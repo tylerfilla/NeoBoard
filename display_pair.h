@@ -34,7 +34,14 @@ namespace neo
 class display_pair
 {
 public:
+    /**
+     * Color value alias.
+     */
     using color_t = neo::display_panel::color_t;
+
+    /**
+     * Dimension value alias.
+     */
     using dim_t = neo::display_panel::dim_t;
 
 private:
@@ -66,7 +73,7 @@ private:
      * Get whichever panel has the given point on the drawing surface.
      */
     display_panel& panel_for_point(dim_t x, dim_t y, dim_t& out_px,
-        dim_t& out_py);
+        dim_t& out_py) const;
 
 public:
     display_pair(display_panel& panel1_p, display_panel& panel2_p);
@@ -86,30 +93,32 @@ public:
     /**
      * Get whichever panel logically comes first (the "before" panel).
      */
-    inline display_panel& panel_before()
+    inline display_panel& panel_before() const
     { return swapped_m ? panel2_m : panel1_m; }
 
     /**
      * Get whichever panel logically comes second (the "after" panel).
      */
-    inline display_panel& panel_after()
+    inline display_panel& panel_after() const
     { return swapped_m ? panel1_m : panel2_m; }
 
     /**
      * Swap (or un..swap?) the panels' logical order.
      */
     inline void swap()
-    {
-        swapped_m = !swapped_m;
-    }
+    { swapped_m = !swapped_m; }
 
     /**
      * Toggle the vertically-stacked state of the panels.
      */
     inline void stack()
-    {
-        stacked_m = !stacked_m;
-    }
+    { stacked_m = !stacked_m; }
+
+    inline dim_t surface_width() const
+    { return panel1_m.width() + stacked_m ? 0 : panel2_m.width(); }
+
+    inline dim_t surface_height() const
+    { return panel1_m.height() + stacked_m ? panel2_m.height() : 0; }
 
     /**
      * Clear the drawing surface.

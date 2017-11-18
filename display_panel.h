@@ -35,12 +35,12 @@ public:
     /**
      * A pixel color.
      */
-    typedef uint32_t color_t;
+    using color_t = uint32_t;
 
     /**
      * A dimension value.
      */
-    typedef uint16_t dim_t;
+    using dim_t =  uint16_t;
 
 protected:
     /**

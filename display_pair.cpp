@@ -21,7 +21,7 @@
 #include "display_pair.h"
 
 neo::display_panel& neo::display_pair::panel_for_point(dim_t x, dim_t y,
-    dim_t& out_px, dim_t& out_py)
+    dim_t& out_px, dim_t& out_py) const
 {
     auto& p_before = panel_before();
     auto& p_after = panel_after();

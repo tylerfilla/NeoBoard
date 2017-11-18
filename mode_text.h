@@ -23,7 +23,7 @@
 
 #include "mode.h"
 
-#define TEXT_BUFFER_SIZE 512
+#define TEXT_BUFFER_SIZE 256
 
 namespace neo
 {
@@ -34,6 +34,38 @@ namespace neo
  */
 class mode_text : public mode
 {
+public:
+    /**
+     * A text color.
+     */
+    using color_t = uint32_t;
+
+    /**
+     * Default text background color.
+     */
+    static constexpr color_t DEFAULT_COLOR_BG = 0x00000000;
+
+    /**
+     * Default text foreground color.
+     */
+    static constexpr color_t DEFAULT_COLOR_FG = 0x00ffffff;
+
+private:
+    /**
+     * The current text background color.
+     */
+    color_t color_bg_m;
+
+    /**
+     * The current text foreground color.
+     */
+    color_t color_fg_m;
+
+    /**
+     * The active color reference.
+     */
+    color_t& active_color_m;
+
     /**
      * The active text buffer. Plain ol' ASCII with some special in-band
      * formatting sequences for your viewing pleasure. Not null-terminated.
@@ -41,9 +73,25 @@ class mode_text : public mode
     char text_m[TEXT_BUFFER_SIZE];
 
     /**
-     * The length of the text string currently active in the buffer.
+     * The length of the text string currently active in the buffer. This
+     * includes formatting sequences.
      */
     size_t text_len_m;
+
+    /**
+     * The current substitute for obfuscated characters.
+     */
+    char current_obfuscated_char_m;
+
+    /**
+     * The current rainbow color.
+     */
+    color_t current_rainbow_color_m;
+
+    /**
+     * The current rainbow hue used to derive the rainbow color.
+     */
+    int current_rainbow_hue_m;
 
 public:
     mode_text(input_ctrl& input_p, display_pair& displays_p);
