@@ -52,21 +52,6 @@ public:
 
 private:
     /**
-     * The current text background color.
-     */
-    color_t color_bg_m;
-
-    /**
-     * The current text foreground color.
-     */
-    color_t color_fg_m;
-
-    /**
-     * The active color reference.
-     */
-    color_t& active_color_m;
-
-    /**
      * The active text buffer. Plain ol' ASCII with some special in-band
      * formatting sequences for your viewing pleasure. Not null-terminated.
      */

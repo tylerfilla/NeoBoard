@@ -18,6 +18,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <ctype.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "display_pair.h"
@@ -25,15 +27,10 @@
 #include "font_pixely.h"
 #include "mode_text.h"
 
-#include <Arduino.h>
-
 neo::mode_text::mode_text(input_ctrl& input_p, display_pair& displays_p)
         : mode(input_p, displays_p),
-          color_bg_m(DEFAULT_COLOR_BG),
-          color_fg_m(DEFAULT_COLOR_FG),
-          active_color_m(color_fg_m),
-          text_m {"$oSOUP$sMEEP"},
-          text_len_m(12),
+          text_m {"$oSOUP$r$sMEEP"},
+          text_len_m(14),
           current_obfuscated_char_m(' '),
           current_rainbow_color_m(DEFAULT_COLOR_FG),
           current_rainbow_hue_m(0)
@@ -100,6 +97,10 @@ void neo::mode_text::update()
 
     // Alias the one and only font
     namespace font = neo::font::pixely;
+    
+    // Current text background and foreground colors
+    color_t color_bg = DEFAULT_COLOR_BG;
+    color_t color_fg = DEFAULT_COLOR_FG;
 
     // Indicates whether a formatting sequence is currently being processed
     bool format_escape = false;
@@ -107,8 +108,8 @@ void neo::mode_text::update()
     // The cumulative offset to apply to subsequent text characters
     int text_run_offset = 0;
 
+    // Flag indicating obfuscated mode
     bool mode_obfuscated = false;
-    bool mode_rainbow = false;
 
     for (size_t char_idx = 0; char_idx < text_len_m; ++char_idx)
     {
@@ -129,95 +130,109 @@ void neo::mode_text::update()
             switch (char_text)
             {
             case '0':
-                // Set active color to black (clear on typical LED strips)
-                active_color_m = 0x00000000;
+                // Set foreground color to black (clear on typical LED strips)
+                color_fg = 0x00000000;
+                format_escape = false;
                 continue;
             case '1':
-                // Set active color to dark blue
-                active_color_m = 0x000000aa;
+                // Set foreground color to dark blue
+                color_fg = 0x000000aa;
+                format_escape = false;
                 continue;
             case '2':
-                // Set active color to dark green
-                active_color_m = 0x0000aa00;
+                // Set foreground color to dark green
+                color_fg = 0x0000aa00;
+                format_escape = false;
                 continue;
             case '3':
-                // Set active color to dark aqua
-                active_color_m = 0x0000aaaa;
+                // Set foreground color to dark aqua
+                color_fg = 0x0000aaaa;
+                format_escape = false;
                 continue;
             case '4':
-                // Set active color to dark red
-                active_color_m = 0x00aa0000;
+                // Set foreground color to dark red
+                color_fg = 0x00aa0000;
+                format_escape = false;
                 continue;
             case '5':
-                // Set active color to dark purple
-                active_color_m = 0x00aa00aa;
+                // Set foreground color to dark purple
+                color_fg = 0x00aa00aa;
+                format_escape = false;
                 continue;
             case '6':
-                // Set active color to gold
-                active_color_m = 0x00ffaa00;
+                // Set foreground color to gold
+                color_fg = 0x00ffaa00;
+                format_escape = false;
                 continue;
             case '7':
-                // Set active color to gray (or less bright white)
-                active_color_m = 0x00aaaaaa;
+                // Set foreground color to gray (or less bright white)
+                color_fg = 0x00aaaaaa;
+                format_escape = false;
                 continue;
             case '8':
-                // Set active color to dark gray (even less bright white)
-                active_color_m = 0x00555555;
+                // Set foreground color to dark gray (even less bright white)
+                color_fg = 0x00555555;
+                format_escape = false;
                 continue;
             case '9':
-                // Set active color to blue
-                active_color_m = 0x000000ff;
+                // Set foreground color to blue
+                color_fg = 0x000000ff;
+                format_escape = false;
                 continue;
             case 'a':
             case 'A':
-                // Set active color to green
-                active_color_m = 0x0000ff00;
+                // Set foreground color to green
+                color_fg = 0x0000ff00;
+                format_escape = false;
                 continue;
             case 'b':
             case 'B':
-                // Set active color to aqua
-                active_color_m = 0x0000ffff;
+                // Set foreground color to aqua
+                color_fg = 0x0000ffff;
+                format_escape = false;
                 continue;
             case 'c':
             case 'C':
-                // Set active color to red
-                active_color_m = 0x00ff0000;
+                // Set foreground color to red
+                color_fg = 0x00ff0000;
+                format_escape = false;
                 continue;
             case 'd':
             case 'D':
-                // Set active color to light purple
-                active_color_m = 0x00ff00ff;
+                // Set foreground color to light purple
+                color_fg = 0x00ff00ff;
+                format_escape = false;
                 continue;
             case 'e':
             case 'E':
-                // Set active color to yellow
-                active_color_m = 0x00ffff00;
+                // Set foreground color to yellow
+                color_fg = 0x00ffff00;
+                format_escape = false;
                 continue;
             case 'f':
             case 'F':
-                // Set active color to white
-                active_color_m = 0x00ffffff;
+                // Set foreground color to white
+                color_fg = 0x00ffffff;
+                format_escape = false;
                 continue;
             case 'o':
                 // Obfuscated mode
                 mode_obfuscated = true;
+                format_escape = false;
                 continue;
             case 'r':
                 // Reset a bunch of stuff
                 mode_obfuscated = false;
-                mode_rainbow = false;
-                color_bg_m = DEFAULT_COLOR_BG;
-                color_fg_m = DEFAULT_COLOR_FG;
-                active_color_m = color_fg_m;
+                color_bg = DEFAULT_COLOR_BG;
+                color_fg = DEFAULT_COLOR_FG;
+                format_escape = false;
                 continue;
             case 's':
                 // Rainbow mode
-                mode_rainbow = true;
-                continue;
-            default:
-                // Not a formatting character, so clear escape flag
+                // Set foreground color to rainbow frame
+                color_fg = current_rainbow_color_m;
                 format_escape = false;
-                break;
+                continue;
             }
         }
 
@@ -225,12 +240,6 @@ void neo::mode_text::update()
         if (mode_obfuscated)
         {
             char_text = current_obfuscated_char_m;
-        }
-
-        // Handle rainbow mode
-        if (mode_rainbow)
-        {
-            active_color_m = current_rainbow_color_m;
         }
 
         // Get character bitmap data and dimensions
@@ -253,7 +262,7 @@ void neo::mode_text::update()
 
                 // Determine the color to be applied to this pixel
                 // Use foreground color for text and background color everywhere else
-                auto color = ((column_data >> row) & 1) ? color_fg_m : color_bg_m;
+                auto color = ((column_data >> row) & 1) ? color_fg : color_bg;
 
                 // Buffer the pixel color
                 displays_m.set_pixel(x, y, color);
