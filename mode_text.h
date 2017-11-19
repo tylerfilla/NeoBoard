@@ -78,6 +78,18 @@ private:
      */
     int current_rainbow_hue_m;
 
+    /**
+     * Whether to enable marquee mode.
+     */
+    bool marquee_enable_m;
+
+    /**
+     * The marquee step counter. Will produce a yucky glitchy step once every
+     * 2^32 cycles or until I stop being lazy and add a proper detection and
+     * mitigation strategy. :P
+     */
+    uint32_t marquee_step_m;
+
 public:
     mode_text(input_ctrl& input_p, display_pair& displays_p);
 

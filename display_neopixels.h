@@ -46,7 +46,7 @@ class display_neopixels : public display_panel
 
 public:
     display_neopixels(Adafruit_NeoPixel& neopixels_p, unsigned int offset_p,
-        unsigned int width_p, unsigned int height_p);
+        dim_t width_p, dim_t height_p);
 
     /**
      * Get the Adafruit NeoPixel backend instance.

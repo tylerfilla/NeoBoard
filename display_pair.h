@@ -115,10 +115,10 @@ public:
     { stacked_m = !stacked_m; }
 
     inline dim_t surface_width() const
-    { return panel1_m.width() + stacked_m ? 0 : panel2_m.width(); }
+    { return panel1_m.width() + (stacked_m ? 0 : panel2_m.width()); }
 
     inline dim_t surface_height() const
-    { return panel1_m.height() + stacked_m ? panel2_m.height() : 0; }
+    { return panel1_m.height() + (stacked_m ? panel2_m.height() : 0); }
 
     /**
      * Clear the drawing surface.

@@ -46,26 +46,20 @@ protected:
     /**
      * The display width.
      */
-    unsigned int width_m;
+    dim_t width_m;
     
     /**
      * The display height.
      */
-    unsigned int height_m;
+    dim_t height_m;
 
-    display_panel(unsigned int width_p, unsigned int height_p);
+    display_panel(dim_t width_p, dim_t height_p);
 
 public:
-    /**
-     * Get the display width.
-     */
-    inline unsigned int width() const
+    inline dim_t width() const
     { return width_m; }
     
-    /**
-     * Get the display height.
-     */
-    inline unsigned int height() const
+    inline dim_t height() const
     { return height_m; }
 
     /**

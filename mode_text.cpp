@@ -29,11 +29,13 @@
 
 neo::mode_text::mode_text(input_ctrl& input_p, display_pair& displays_p)
         : mode(input_p, displays_p),
-          text_m {"$oSOUP$r$sMEEP"},
-          text_len_m(14),
+          text_m {"$aT$cE$aS$cT"},
+          text_len_m(12),
           current_obfuscated_char_m(' '),
           current_rainbow_color_m(DEFAULT_COLOR_FG),
-          current_rainbow_hue_m(0)
+          current_rainbow_hue_m(0),
+          marquee_enable_m(true),
+          marquee_step_m(0)
 {
 }
 
@@ -78,6 +80,10 @@ static void hsl_to_rgb(float h, float s, float l, int& out_r, int& out_g, int& o
 
 void neo::mode_text::update()
 {
+    // Clear the drawing surface
+    // FIXME: This is not necessary all the time
+    displays_m.surface_clear();
+
     // Change obfuscated character
     current_obfuscated_char_m = 0;
     while (!isprint(current_obfuscated_char_m))
@@ -94,6 +100,11 @@ void neo::mode_text::update()
     hsl_to_rgb(current_rainbow_hue_m, 1.0f, 0.5f, r, g, b);
 
     current_rainbow_color_m = ((color_t) r << 16) | ((color_t) g << 8) | (color_t) b;
+
+    if (marquee_enable_m)
+    {
+        marquee_step_m++;
+    }
 
     // Alias the one and only font
     namespace font = neo::font::pixely;
@@ -259,6 +270,19 @@ void neo::mode_text::update()
                 // Get pixel coordinates on logical drawing surface
                 int x = text_run_offset + column;
                 int y = font::height - row - 1;
+
+                // Handle marquee animation
+                if (marquee_enable_m)
+                {
+                    x -= marquee_step_m;
+
+                    // Wrap x into proper range
+                    while (x < 0)
+                    {
+                        x += displays_m.surface_width();
+                    }
+                    x %= displays_m.surface_width();
+                }
 
                 // Determine the color to be applied to this pixel
                 // Use foreground color for text and background color everywhere else
