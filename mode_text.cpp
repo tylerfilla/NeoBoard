@@ -32,9 +32,9 @@ neo::mode_text::mode_text(input_ctrl& input_p, display_pair& displays_p)
           color_bg_m(DEFAULT_COLOR_BG),
           color_fg_m(DEFAULT_COLOR_FG),
           active_color_m(color_fg_m),
-          text_m {"$sMEEPMEEP"},
-          text_len_m(10),
-          current_obfuscated_char_m('?'),
+          text_m {"$oSOUP$sMEEP"},
+          text_len_m(12),
+          current_obfuscated_char_m(' '),
           current_rainbow_color_m(DEFAULT_COLOR_FG),
           current_rainbow_hue_m(0)
 {
@@ -81,8 +81,15 @@ static void hsl_to_rgb(float h, float s, float l, int& out_r, int& out_g, int& o
 
 void neo::mode_text::update()
 {
+    // Change obfuscated character
+    current_obfuscated_char_m = 0;
+    while (!isprint(current_obfuscated_char_m))
+    {
+        current_obfuscated_char_m = rand() % 128;
+    }
+
     // Increment rainbow hue
-    current_rainbow_hue_m += 5;
+    current_rainbow_hue_m += 1;
     current_rainbow_hue_m %= 360;
 
     // FIXME: optimize this
@@ -100,10 +107,13 @@ void neo::mode_text::update()
     // The cumulative offset to apply to subsequent text characters
     int text_run_offset = 0;
 
+    bool mode_obfuscated = false;
+    bool mode_rainbow = false;
+
     for (size_t char_idx = 0; char_idx < text_len_m; ++char_idx)
     {
         // Get character value
-        auto char_text = text_m[char_idx];
+        char char_text = text_m[char_idx];
 
         // Match unescaped format escape character
         if (char_text == '$' && !format_escape)
@@ -159,44 +169,68 @@ void neo::mode_text::update()
                 active_color_m = 0x000000ff;
                 continue;
             case 'a':
+            case 'A':
                 // Set active color to green
                 active_color_m = 0x0000ff00;
                 continue;
             case 'b':
+            case 'B':
                 // Set active color to aqua
                 active_color_m = 0x0000ffff;
                 continue;
             case 'c':
+            case 'C':
                 // Set active color to red
                 active_color_m = 0x00ff0000;
                 continue;
             case 'd':
+            case 'D':
                 // Set active color to light purple
                 active_color_m = 0x00ff00ff;
                 continue;
             case 'e':
+            case 'E':
                 // Set active color to yellow
                 active_color_m = 0x00ffff00;
                 continue;
             case 'f':
+            case 'F':
                 // Set active color to white
                 active_color_m = 0x00ffffff;
                 continue;
+            case 'o':
+                // Obfuscated mode
+                mode_obfuscated = true;
+                continue;
             case 'r':
-                // Reset all formatting
+                // Reset a bunch of stuff
+                mode_obfuscated = false;
+                mode_rainbow = false;
                 color_bg_m = DEFAULT_COLOR_BG;
                 color_fg_m = DEFAULT_COLOR_FG;
                 active_color_m = color_fg_m;
                 continue;
             case 's':
-                // Set active color to the current rainbow frame
-                active_color_m = current_rainbow_color_m;
+                // Rainbow mode
+                mode_rainbow = true;
                 continue;
             default:
                 // Not a formatting character, so clear escape flag
                 format_escape = false;
                 break;
             }
+        }
+
+        // Handle obfuscated mode
+        if (mode_obfuscated)
+        {
+            char_text = current_obfuscated_char_m;
+        }
+
+        // Handle rainbow mode
+        if (mode_rainbow)
+        {
+            active_color_m = current_rainbow_color_m;
         }
 
         // Get character bitmap data and dimensions
