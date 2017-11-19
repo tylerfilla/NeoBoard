@@ -30,76 +30,91 @@ namespace neo
  */
 class input_ctrl
 {
-    /** The current state of the d-pad up button. */
+    /**
+     * The current state of the d-pad up button.
+     */
     bool btn_up_m;
 
-    /** The current state of the d-pad down button. */
+    /**
+     * Whether btn_up_m has recently changed.
+     */
+    bool btn_up_changed_m;
+
+    /**
+     * The current state of the d-pad down button.
+     */
     bool btn_down_m;
 
-    /** The current state of the d-pad left button. */
+    /**
+     * Whether btn_down_m has recently changed.
+     */
+    bool btn_down_changed_m;
+
+    /**
+     * The current state of the d-pad left button.
+     */
     bool btn_left_m;
 
-    /** The current state of the d-pad right button. */
+    /**
+     * Whether btn_left_m has recently changed.
+     */
+    bool btn_left_changed_m;
+
+    /**
+     * The current state of the d-pad right button.
+     */
     bool btn_right_m;
 
-    /** The current state of the select button. */
+    /**
+     * Whether btn_right_m has recently changed.
+     */
+    bool btn_right_changed_m;
+
+    /**
+     * The current state of the select button.
+     */
     bool btn_select_m;
 
-public:
     /**
-     * Get whether the up button is pressed.
+     * Whether btn_select_m has recently changed.
      */
-    inline bool btn_up() const
-    { return btn_up_m; }
+    bool btn_select_changed_m;
 
-    /**
-     * Indicate whether the up button is pressed.
-     */
+public:
+    bool btn_up();
+
     input_ctrl& btn_up(bool btn_up_p);
 
-    /**
-     * Get whether the down button is pressed.
-     */
-    inline bool btn_down() const
-    { return btn_down_m; }
+    inline bool btn_up_changed() const
+    { return btn_up_changed_m; }
 
-    /**
-     * Indicate whether the down button is pressed.
-     */
+    bool btn_down();
+
     input_ctrl& btn_down(bool btn_down_p);
 
-    /**
-     * Get whether the left button is pressed.
-     */
-    inline bool btn_left() const
-    { return btn_left_m; }
+    inline bool btn_down_changed() const
+    { return btn_down_changed_m; }
 
-    /**
-     * Indicate whether the left button is pressed.
-     */
+    bool btn_left();
+
     input_ctrl& btn_left(bool btn_left_p);
 
-    /**
-     * Get whether the right button is pressed.
-     */
-    inline bool btn_right() const
-    { return btn_right_m; }
+    inline bool btn_left_changed() const
+    { return btn_left_changed_m; }
 
-    /**
-     * Indicate whether the right button is pressed.
-     */
+    bool btn_right();
+
     input_ctrl& btn_right(bool btn_right_p);
 
-    /**
-     * Get whether the select button is pressed.
-     */
-    inline bool btn_select() const
-    { return btn_select_m; }
+    inline bool btn_right_changed() const
+    { return btn_right_changed_m; }
 
-    /**
-     * Indicate whether the select button is pressed.
-     */
+    bool btn_select();
+
     input_ctrl& btn_select(bool btn_select_p);
+
+    inline bool btn_select_changed() const
+    { return btn_select_changed_m; }
 };
 
 } // namespace neo
