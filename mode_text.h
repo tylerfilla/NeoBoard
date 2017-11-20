@@ -69,14 +69,19 @@ private:
     char current_obfuscated_char_m;
 
     /**
-     * The current rainbow color.
+     * The current rainbow A color.
      */
-    color_t current_rainbow_color_m;
+    color_t current_rainbow_color_a_m;
 
     /**
-     * The current rainbow hue used to derive the rainbow color.
+     * The current rainbow B color.
      */
-    int current_rainbow_hue_m;
+    color_t current_rainbow_color_b_m;
+
+    /**
+     * The current rainbow hue used to drive both rainbow colors.
+     */
+    int current_rainbow_driver_hue_m;
 
     /**
      * Whether to enable marquee mode.

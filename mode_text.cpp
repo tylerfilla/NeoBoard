@@ -29,11 +29,11 @@
 
 neo::mode_text::mode_text(input_ctrl& input_p, display_pair& displays_p)
         : mode(input_p, displays_p),
-          text_m {"$aT$cE$aS$cT"},
+          text_m {"$sT$tE$sS$tT"},
           text_len_m(12),
           current_obfuscated_char_m(' '),
-          current_rainbow_color_m(DEFAULT_COLOR_FG),
-          current_rainbow_hue_m(0),
+          current_rainbow_color_a_m(DEFAULT_COLOR_FG),
+          current_rainbow_driver_hue_m(0),
           marquee_enable_m(false),
           marquee_step_m(0)
 {
@@ -69,20 +69,44 @@ static void hsl_to_rgb(float h, float s, float l, int& out_r, int& out_g, int& o
     float q = l < 0.5f ? l * (1 + s) : l + s - l * s;
     float p = 2 * l - q;
 
-    float r = hue_to_rgb(p, q, h + (float) 1 / 3);
-    float g = hue_to_rgb(p, q, h);
-    float b = hue_to_rgb(p, q, h - (float) 1 / 3);
+    float rainbow_a_r = hue_to_rgb(p, q, h + (float) 1 / 3);
+    float rainbow_a_g = hue_to_rgb(p, q, h);
+    float rainbow_a_b = hue_to_rgb(p, q, h - (float) 1 / 3);
 
-    out_r = (int) (255.f * r);
-    out_g = (int) (255.f * g);
-    out_b = (int) (255.f * b);
+    out_r = (int) (255.f * rainbow_a_r);
+    out_g = (int) (255.f * rainbow_a_g);
+    out_b = (int) (255.f * rainbow_a_b);
 }
 
 void neo::mode_text::update()
 {
-    // Clear the drawing surface
-    // FIXME: This is not necessary all the time
-    displays_m.surface_clear();
+    //
+    // Handle Rainbow Color
+    //
+
+    // Increment rainbow driver hue
+    current_rainbow_driver_hue_m += 1;
+    current_rainbow_driver_hue_m %= 360;
+
+    int rainbow_hue_a = current_rainbow_driver_hue_m;
+    int rainbow_hue_b = (current_rainbow_driver_hue_m + 180) % 360;
+
+    int rainbow_a_r;
+    int rainbow_a_g;
+    int rainbow_a_b;
+    int rainbow_b_r;
+    int rainbow_b_g;
+    int rainbow_b_b;
+    
+    // FIXME: This really needs to be optimized
+    hsl_to_rgb(rainbow_hue_a, 1.0f, 0.5f, rainbow_a_r, rainbow_a_g, rainbow_a_b);
+    hsl_to_rgb(rainbow_hue_b, 1.0f, 0.5f, rainbow_b_r, rainbow_b_g, rainbow_b_b);
+    current_rainbow_color_a_m = ((color_t) rainbow_a_r << 16) | ((color_t) rainbow_a_g << 8) | (color_t) rainbow_a_b;
+    current_rainbow_color_b_m = ((color_t) rainbow_b_r << 16) | ((color_t) rainbow_b_g << 8) | (color_t) rainbow_b_b;
+
+    //
+    // Handle Obfuscated Text
+    //
 
     // Change obfuscated character
     current_obfuscated_char_m = 0;
@@ -91,20 +115,22 @@ void neo::mode_text::update()
         current_obfuscated_char_m = rand() % 128;
     }
 
-    // Increment rainbow hue
-    current_rainbow_hue_m += 1;
-    current_rainbow_hue_m %= 360;
+    //
+    // Handle Marquee
+    //
 
-    // FIXME: optimize this
-    int r, g, b;
-    hsl_to_rgb(current_rainbow_hue_m, 1.0f, 0.5f, r, g, b);
-
-    current_rainbow_color_m = ((color_t) r << 16) | ((color_t) g << 8) | (color_t) b;
-
+    // Step the marquee forward, if enabled
     if (marquee_enable_m)
     {
         marquee_step_m++;
     }
+
+    //
+    // Draw the Frame
+    //
+
+    // Clear the drawing surface
+    displays_m.surface_clear();
 
     // Alias the one and only font
     namespace font = neo::font::pixely;
@@ -185,7 +211,7 @@ void neo::mode_text::update()
                 // Set foreground color to green
                 color_fg = 0x0000ff00;
                 goto escape_done;
-            case 'b':
+            case 'rainbow_a_b':
             case 'B':
                 // Set foreground color to aqua
                 color_fg = 0x0000ffff;
@@ -219,16 +245,21 @@ void neo::mode_text::update()
                 // Enable obfuscated mode
                 mode_obfuscated = true;
                 goto escape_done;
-            case 'r':
+            case 'rainbow_a_r':
                 // Reset a bunch of stuff
                 mode_obfuscated = false;
                 color_bg = DEFAULT_COLOR_BG;
                 color_fg = DEFAULT_COLOR_FG;
                 goto escape_done;
             case 's':
-                // Rainbow mode
-                // Set foreground color to rainbow frame
-                color_fg = current_rainbow_color_m;
+                // Rainbow mode A
+                // Set foreground color to rainbow A color
+                color_fg = current_rainbow_color_a_m;
+                goto escape_done;
+            case 't':
+                // Rainbow mode B
+                // Set foreground color to rainbow B color
+                color_fg = current_rainbow_color_b_m;
                 goto escape_done;
             default:
                 goto escape_continue;
