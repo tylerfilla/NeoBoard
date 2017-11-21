@@ -90,8 +90,8 @@ private:
 
     /**
      * The marquee step counter. Will produce a yucky glitchy step once every
-     * 2^32 cycles or until I stop being lazy and add a proper detection and
-     * mitigation strategy. :P
+     * 2^32 steps or until I stop being lazy and add a proper detection and
+     * mitigation strategy.
      */
     uint32_t marquee_step_m;
 

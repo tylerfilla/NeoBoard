@@ -124,6 +124,4 @@ void loop()
     {
         current_mode_g->update();
     }
-
-    delay(10);
 }

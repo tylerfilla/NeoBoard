@@ -29,8 +29,8 @@
 
 neo::mode_text::mode_text(input_ctrl& input_p, display_pair& displays_p)
         : mode(input_p, displays_p),
-          text_m {"$sT$tE$sS$tT"},
-          text_len_m(12),
+          text_m {"$sD$tO$sP$tP$sL$tE$sR$t!"},
+          text_len_m(24),
           current_obfuscated_char_m(' '),
           current_rainbow_color_a_m(DEFAULT_COLOR_FG),
           current_rainbow_driver_hue_m(0),
@@ -39,43 +39,48 @@ neo::mode_text::mode_text(input_ctrl& input_p, display_pair& displays_p)
 {
 }
 
-static float hue_to_rgb(float p, float q, float t)
+static neo::mode_text::color_t compute_hue_color(int hue)
 {
-    if (t < 0)
-    {
-        ++t;
-    }
+    // Augmented hues for different centers of color
+    int hue_aug_r = hue + 120;
+    int hue_aug_g = hue;
+    int hue_aug_b = hue - 120;
 
-    if (t > 1)
-    {
-        --t;
-    }
+    // Wrap augmented hues within limits for degree angles
+    // This can possibly be improved by checking for validity first
+    // Would a comparison on each of these be faster or slower?
+    hue_aug_r = (hue_aug_r + 360) % 360;
+    hue_aug_g = (hue_aug_g + 360) % 360;
+    hue_aug_b = (hue_aug_b + 360) % 360;
 
-    if (t < (float) 1 / 6)
-        return p + (q - p) * 6 * t;
+    // Unassembled RGB components
+    neo::mode_text::color_t comp_red = 0;
+    neo::mode_text::color_t comp_green = 0;
+    neo::mode_text::color_t comp_blue = 0;
 
-    if (t < (float) 1 / 2)
-        return q;
+#define COMPUTE_COMPONENT(hue_aug, comp)                            \
+    if (hue_aug < 60)                                               \
+    {                                                               \
+        comp = (int) (255.0f * 6.0f * (float) hue_aug / 360.0f);    \
+    }                                                               \
+    else if (hue_aug < 180)                                         \
+    {                                                               \
+        comp = 255;                                                 \
+    }                                                               \
+    else if (hue_aug < 240)                                         \
+    {                                                               \
+        comp = (int) (255.0f * (4.0f - (float) hue_aug / 60.0f));   \
+    }                                                               \
 
-    if (t < (float) 2 / 3)
-        return p + (q - p) * ((float) 2 / 3 - t) * 6;
+    // Compute components from augmented hues
+    COMPUTE_COMPONENT(hue_aug_r, comp_red)
+    COMPUTE_COMPONENT(hue_aug_g, comp_green)
+    COMPUTE_COMPONENT(hue_aug_b, comp_blue)
 
-    return p;
-}
+#undef COMPUTE_COMPONENT
 
-static void hsl_to_rgb(float h, float s, float l, int& out_r, int& out_g, int& out_b)
-{
-    h /= (float) 360;
-    float q = l < 0.5f ? l * (1 + s) : l + s - l * s;
-    float p = 2 * l - q;
-
-    float rainbow_a_r = hue_to_rgb(p, q, h + (float) 1 / 3);
-    float rainbow_a_g = hue_to_rgb(p, q, h);
-    float rainbow_a_b = hue_to_rgb(p, q, h - (float) 1 / 3);
-
-    out_r = (int) (255.f * rainbow_a_r);
-    out_g = (int) (255.f * rainbow_a_g);
-    out_b = (int) (255.f * rainbow_a_b);
+    // String together the components into the final color value
+    return (comp_red << 16) | (comp_green << 8) | comp_blue;
 }
 
 void neo::mode_text::update()
@@ -85,24 +90,17 @@ void neo::mode_text::update()
     //
 
     // Increment rainbow driver hue
-    current_rainbow_driver_hue_m += 1;
+    current_rainbow_driver_hue_m += 10;
     current_rainbow_driver_hue_m %= 360;
 
+    // Find hues for both rainbow channels
     int rainbow_hue_a = current_rainbow_driver_hue_m;
     int rainbow_hue_b = (current_rainbow_driver_hue_m + 180) % 360;
 
-    int rainbow_a_r;
-    int rainbow_a_g;
-    int rainbow_a_b;
-    int rainbow_b_r;
-    int rainbow_b_g;
-    int rainbow_b_b;
-    
-    // FIXME: This really needs to be optimized
-    hsl_to_rgb(rainbow_hue_a, 1.0f, 0.5f, rainbow_a_r, rainbow_a_g, rainbow_a_b);
-    hsl_to_rgb(rainbow_hue_b, 1.0f, 0.5f, rainbow_b_r, rainbow_b_g, rainbow_b_b);
-    current_rainbow_color_a_m = ((color_t) rainbow_a_r << 16) | ((color_t) rainbow_a_g << 8) | (color_t) rainbow_a_b;
-    current_rainbow_color_b_m = ((color_t) rainbow_b_r << 16) | ((color_t) rainbow_b_g << 8) | (color_t) rainbow_b_b;
+    // Compute RGB colors for fully-saturated, half-lit variants of these hues
+    // FIXME: Only need to compute what's necessary for each frame
+    current_rainbow_color_a_m = compute_hue_color(rainbow_hue_a);
+    current_rainbow_color_b_m = compute_hue_color(rainbow_hue_b);
 
     //
     // Handle Obfuscated Text
@@ -122,7 +120,7 @@ void neo::mode_text::update()
     // Step the marquee forward, if enabled
     if (marquee_enable_m)
     {
-        marquee_step_m++;
+        marquee_step_m += 10;
     }
 
     //
@@ -171,11 +169,11 @@ void neo::mode_text::update()
                 color_fg = 0x00000000;
                 goto escape_done;
             case '1':
-                // Set foreground color to dark blue
+                // Set foreground color to dark comp_blue
                 color_fg = 0x000000aa;
                 goto escape_done;
             case '2':
-                // Set foreground color to dark green
+                // Set foreground color to dark comp_green
                 color_fg = 0x0000aa00;
                 goto escape_done;
             case '3':
@@ -183,7 +181,7 @@ void neo::mode_text::update()
                 color_fg = 0x0000aaaa;
                 goto escape_done;
             case '4':
-                // Set foreground color to dark red
+                // Set foreground color to dark comp_red
                 color_fg = 0x00aa0000;
                 goto escape_done;
             case '5':
@@ -203,22 +201,22 @@ void neo::mode_text::update()
                 color_fg = 0x00555555;
                 goto escape_done;
             case '9':
-                // Set foreground color to blue
+                // Set foreground color to comp_blue
                 color_fg = 0x000000ff;
                 goto escape_done;
             case 'a':
             case 'A':
-                // Set foreground color to green
+                // Set foreground color to comp_green
                 color_fg = 0x0000ff00;
                 goto escape_done;
-            case 'rainbow_a_b':
+            case 'b':
             case 'B':
                 // Set foreground color to aqua
                 color_fg = 0x0000ffff;
                 goto escape_done;
             case 'c':
             case 'C':
-                // Set foreground color to red
+                // Set foreground color to comp_red
                 color_fg = 0x00ff0000;
                 goto escape_done;
             case 'd':
@@ -245,7 +243,7 @@ void neo::mode_text::update()
                 // Enable obfuscated mode
                 mode_obfuscated = true;
                 goto escape_done;
-            case 'rainbow_a_r':
+            case 'r':
                 // Reset a bunch of stuff
                 mode_obfuscated = false;
                 color_bg = DEFAULT_COLOR_BG;
@@ -298,7 +296,7 @@ void neo::mode_text::update()
                 // Handle marquee animation
                 if (marquee_enable_m)
                 {
-                    x -= marquee_step_m;
+                    x -= marquee_step_m / 100;
 
                     // Wrap x into proper range
                     while (x < 0)
