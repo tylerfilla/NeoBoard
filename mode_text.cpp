@@ -90,7 +90,7 @@ void neo::mode_text::update()
     //
 
     // Increment rainbow driver hue
-    current_rainbow_driver_hue_m += 10;
+    current_rainbow_driver_hue_m += 3;
     current_rainbow_driver_hue_m %= 360;
 
     // Find hues for both rainbow channels
@@ -169,11 +169,11 @@ void neo::mode_text::update()
                 color_fg = 0x00000000;
                 goto escape_done;
             case '1':
-                // Set foreground color to dark comp_blue
+                // Set foreground color to dark blue
                 color_fg = 0x000000aa;
                 goto escape_done;
             case '2':
-                // Set foreground color to dark comp_green
+                // Set foreground color to dark green
                 color_fg = 0x0000aa00;
                 goto escape_done;
             case '3':
@@ -181,7 +181,7 @@ void neo::mode_text::update()
                 color_fg = 0x0000aaaa;
                 goto escape_done;
             case '4':
-                // Set foreground color to dark comp_red
+                // Set foreground color to dark red
                 color_fg = 0x00aa0000;
                 goto escape_done;
             case '5':
@@ -201,12 +201,12 @@ void neo::mode_text::update()
                 color_fg = 0x00555555;
                 goto escape_done;
             case '9':
-                // Set foreground color to comp_blue
+                // Set foreground color to blue
                 color_fg = 0x000000ff;
                 goto escape_done;
             case 'a':
             case 'A':
-                // Set foreground color to comp_green
+                // Set foreground color to green
                 color_fg = 0x0000ff00;
                 goto escape_done;
             case 'b':
@@ -216,7 +216,7 @@ void neo::mode_text::update()
                 goto escape_done;
             case 'c':
             case 'C':
-                // Set foreground color to comp_red
+                // Set foreground color to red
                 color_fg = 0x00ff0000;
                 goto escape_done;
             case 'd':
