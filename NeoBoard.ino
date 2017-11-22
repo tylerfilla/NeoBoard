@@ -26,6 +26,8 @@
 #include "mode_text.h"
 #include "mode.h"
 
+#include "string_store.h"
+
 /**
  * Pin for the up directional button. Pulled up. Use a N/O switch to GND.
  */

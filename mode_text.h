@@ -23,8 +23,6 @@
 
 #include "mode.h"
 
-#define TEXT_BUFFER_SIZE 256
-
 namespace neo
 {
 
@@ -39,6 +37,11 @@ public:
      * A text color.
      */
     using color_t = uint32_t;
+
+    /**
+     * The maximum allocated size for the text buffer.
+     */
+    static constexpr auto TEXT_BUFFER_SIZE = 128;
 
     /**
      * Default text background color.
