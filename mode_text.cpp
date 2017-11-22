@@ -25,6 +25,7 @@
 #include "display_pair.h"
 #include "display_panel.h"
 #include "font_pixely.h"
+#include "input_ctrl.h"
 #include "mode_text.h"
 
 neo::mode_text::mode_text(input_ctrl& input_p, display_pair& displays_p)
@@ -89,6 +90,24 @@ static neo::mode_text::color_t compute_hue_color(int hue)
 
 void neo::mode_text::update()
 {
+    //
+    // Handle User Input
+    //
+
+    // Handle edit mode-specific input
+    if (editing_m)
+    {
+        // Handle caret movement
+        if (input_m.btn_left_changed() && input_m.btn_left())
+        {
+            edit_caret_pos_m--;
+        }
+        if (input_m.btn_right_changed() && input_m.btn_right())
+        {
+            edit_caret_pos_m++;
+        }
+    }
+
     //
     // Handle Rainbow Color
     //
@@ -243,26 +262,31 @@ void neo::mode_text::update()
                     color_fg = 0x00ffffff;
                     goto escape_done;
                 case 'm':
+                case 'M':
                     // Enable marquee mode
                     // This is a global flag
                     marquee_enable_m = true;
                     goto escape_done;
                 case 'o':
+                case 'O':
                     // Enable obfuscated mode
                     mode_obfuscated = true;
                     goto escape_done;
                 case 'r':
+                case 'R':
                     // Reset a bunch of stuff
                     mode_obfuscated = false;
                     color_bg = DEFAULT_COLOR_BG;
                     color_fg = DEFAULT_COLOR_FG;
                     goto escape_done;
                 case 's':
+                case 'S':
                     // Rainbow mode A
                     // Set foreground color to rainbow A color
                     color_fg = current_rainbow_color_a_m;
                     goto escape_done;
                 case 't':
+                case 'T':
                     // Rainbow mode B
                     // Set foreground color to rainbow B color
                     color_fg = current_rainbow_color_b_m;
@@ -336,6 +360,15 @@ void neo::mode_text::update()
 
                 // Buffer the pixel color
                 displays_m.set_pixel(x, y, color);
+            }
+        }
+
+        // Render edit caret in edit mode
+        if (editing_m && char_idx == edit_caret_pos_m)
+        {
+            for (int row = 0; row < char_height; ++row)
+            {
+                displays_m.set_pixel(text_run_offset, row, 0x00ffffff);
             }
         }
 
