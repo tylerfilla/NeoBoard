@@ -113,12 +113,28 @@ private:
      * character with this index. In overtype mode, the caret os over the
      * character with this index.
      */
-    size_t edit_caret_pos_m;
+    long edit_caret_pos_m;
+
+    /**
+     * Whether the edit caret is momentarily visible.
+     */
+    bool edit_caret_visible_m;
+
+    /**
+     * The time, in uptime milliseconds, at which the edit caret should be
+     * toggled.
+     */
+    unsigned long edit_caret_blink_timer_m;
 
     /**
      * Whether the text buffer is currently saved.
      */
     bool saved_m;
+
+    /**
+     * Insert the given character at the given index in the text buffer.
+     */
+    void insert_character(size_t index, char ch);
 
 public:
     mode_text(input_ctrl& input_p, display_pair& displays_p);

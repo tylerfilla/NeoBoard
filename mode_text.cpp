@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "clock.h"
 #include "display_pair.h"
 #include "display_panel.h"
 #include "font_pixely.h"
@@ -37,11 +38,37 @@ neo::mode_text::mode_text(input_ctrl& input_p, display_pair& displays_p)
           current_rainbow_driver_hue_m(0),
           marquee_enable_m(false),
           marquee_step_m(0),
-          editing_m(true),
-          overtype_m(false),
+          editing_m(false),
+          overtype_m(true),
           edit_caret_pos_m(0),
+          edit_caret_visible_m(true),
+          edit_caret_blink_timer_m(0),
           saved_m(true)
 {
+}
+
+void neo::mode_text::insert_character(size_t index, char ch)
+{
+    // Don't exceed buffer size
+    if (text_len_m > TEXT_BUFFER_SIZE)
+        return;
+
+    // If appending, simply tack it on
+    if (index == text_len_m)
+    {
+        text_m[index] = ch;
+    }
+    else
+    {
+        // Not appending, so move stuff out of the way
+        memmove(text_m + index + 1, text_m + index, text_len_m - index);
+
+        // Now add it in
+        text_m[index] = ch;
+    }
+
+    // Increment text length
+    text_len_m++;
 }
 
 static neo::mode_text::color_t compute_hue_color(int hue)
@@ -75,7 +102,7 @@ static neo::mode_text::color_t compute_hue_color(int hue)
     else if (hue_aug < 240)                                         \
     {                                                               \
         comp = (int) (255.0f * (4.0f - (float) hue_aug / 60.0f));   \
-    }                                                               \
+    }
 
     // Compute components from augmented hues
     COMPUTE_COMPONENT(hue_aug_r, comp_red)
@@ -97,15 +124,174 @@ void neo::mode_text::update()
     // Handle edit mode-specific input
     if (editing_m)
     {
+        // Handle save and exit
+        if (input_m.btn_select() && input_m.btn_up_changed()
+            && input_m.btn_up())
+        {
+            // TODO: Save the text buffer
+
+            // Leave edit mode
+            editing_m = false;
+
+            // Skip this update
+            return;
+        }
+
+        // Handle toggle overtype
+        if (input_m.btn_select() && input_m.btn_down_changed()
+            && input_m.btn_down())
+        {
+            // Toggle overtype
+            overtype_m = !overtype_m;
+        }
+
+        // Handle backspace
+        if (input_m.btn_select() && input_m.btn_left_changed()
+            && input_m.btn_left())
+        {
+            // TODO: Backspace
+        }
+
+        // Handle dollar sign shortcut
+        // This is useful for entering formatting commands
+        if (input_m.btn_select() && input_m.btn_right_changed()
+            && input_m.btn_right())
+        {
+            // Insert a dollar sign
+            insert_character(edit_caret_pos_m, '$');
+        }
+
         // Handle caret movement
         if (input_m.btn_left_changed() && input_m.btn_left())
         {
-            edit_caret_pos_m--;
+            if (--edit_caret_pos_m < 0)
+            {
+                edit_caret_pos_m = 0;
+            }
+
+            // Show the caret immediately
+            // This gives a solid text editor feel
+            edit_caret_visible_m = true;
+            edit_caret_blink_timer_m = neo::clock::uptime_millis() + 250;
         }
-        if (input_m.btn_right_changed() && input_m.btn_right())
+        else if (input_m.btn_right_changed() && input_m.btn_right())
         {
-            edit_caret_pos_m++;
+            // Allow caret to go one past the end
+            if (++edit_caret_pos_m >= text_len_m + 1)
+            {
+                edit_caret_pos_m = text_len_m;
+            }
+
+            // Do not allow caret to exceed the text buffer size
+            if (edit_caret_pos_m >= TEXT_BUFFER_SIZE)
+            {
+                edit_caret_pos_m = TEXT_BUFFER_SIZE - 1;
+            }
+
+            // Show the caret immediately
+            // This gives a solid text editor feel
+            edit_caret_visible_m = true;
+            edit_caret_blink_timer_m = neo::clock::uptime_millis() + 250;
         }
+
+        // Handle character editing
+        if (input_m.btn_up_changed() && input_m.btn_up())
+        {
+            // If in overtype mode, edit character under caret
+            if (overtype_m)
+            {
+                if (edit_caret_pos_m == text_len_m)
+                {
+                    // Shortcut: Add in a new character here
+                    insert_character(edit_caret_pos_m, 'Z');
+                }
+
+                // Decrement character (in Z to A direction)
+                text_m[edit_caret_pos_m]--;
+                if (!isprint(text_m[edit_caret_pos_m]))
+                {
+                    // Lowest important printable ASCII character
+                    text_m[edit_caret_pos_m] = ' ';
+                }
+
+                // Flag buffer as unsaved
+                saved_m = false;
+
+                // Temporarily hide the caret for an extended time
+                edit_caret_visible_m = false;
+                edit_caret_blink_timer_m = neo::clock::uptime_millis() + 750;
+            }
+            else
+            {
+                // Currently in insert mode
+                // Insert a suitable starting character
+                insert_character(edit_caret_pos_m, 'Z');
+
+                // Drop back to overtype
+                overtype_m = true;
+            }
+        }
+        else if (input_m.btn_down_changed() && input_m.btn_down())
+        {
+            // If in overtype mode, edit character under caret
+            if (overtype_m)
+            {
+                if (edit_caret_pos_m == text_len_m)
+                {
+                    // Shortcut: Add in a new character here
+                    insert_character(edit_caret_pos_m, 'A');
+                }
+
+                // Increment character (in A to Z direction)
+                text_m[edit_caret_pos_m]++;
+                if (!isprint(text_m[edit_caret_pos_m]))
+                {
+                    // Highest important printable ASCII character
+                    text_m[edit_caret_pos_m] = '~';
+                }
+
+                // Flag buffer as unsaved
+                saved_m = false;
+
+                // Temporarily hide the caret for an extended time
+                edit_caret_visible_m = false;
+                edit_caret_blink_timer_m = neo::clock::uptime_millis() + 750;
+            }
+            else
+            {
+                // Currently in insert mode
+                // Insert a suitable starting character
+                insert_character(edit_caret_pos_m, 'A');
+
+                // Drop back to overtype
+                overtype_m = true;
+            }
+        }
+    }
+    else
+    {
+        // Handle switch to edit mode in insert mode
+        if (input_m.btn_select() && input_m.btn_up_changed()
+            && input_m.btn_up())
+        {
+            // Enter edit mode
+            editing_m = true;
+            overtype_m = true;
+
+            // Skip this update
+            return;
+        }
+    }
+
+    //
+    // Handle Edit State
+    //
+
+    // Handle edit caret blink
+    if (neo::clock::uptime_millis() >= edit_caret_blink_timer_m)
+    {
+        edit_caret_visible_m = !edit_caret_visible_m;
+        edit_caret_blink_timer_m = neo::clock::uptime_millis() + 250;
     }
 
     //
@@ -169,10 +355,29 @@ void neo::mode_text::update()
     // Flag indicating obfuscated mode
     bool mode_obfuscated = false;
 
+    // HACK: If editing, pretend there's an extra character
+    // This will be used later to allow the edit caret to go one past the end
+    if (editing_m)
+    {
+        text_len_m++;
+    }
+
     for (size_t char_idx = 0; char_idx < text_len_m; ++char_idx)
     {
-        // Get character value
-        char char_text = text_m[char_idx];
+        // This particular character
+        char char_text;
+
+        // If editing and we're one past the end
+        if (editing_m && char_idx == text_len_m - 1)
+        {
+            // Display a space (i.e. nothing)
+            char_text = ' ';
+        }
+        else
+        {
+            // Get the real character
+            char_text = text_m[char_idx];
+        }
 
         // If in rendered mode, handle formatting escapes
         // The text color then indicates the save state
@@ -292,12 +497,11 @@ void neo::mode_text::update()
                     color_fg = current_rainbow_color_b_m;
                     goto escape_done;
                 default:
-                    goto escape_continue;
+                    goto escape_done;
                 }
 
             escape_done:
                 format_escape = false;
-            escape_continue:
                 continue;
             }
 
@@ -341,8 +545,8 @@ void neo::mode_text::update()
                 int x = text_run_offset + column;
                 int y = font::height - row - 1;
 
-                // Handle marquee animation
-                if (marquee_enable_m)
+                // Handle marquee animation if not editing
+                if (marquee_enable_m && !editing_m)
                 {
                     x -= marquee_step_m / 100;
 
@@ -368,13 +572,39 @@ void neo::mode_text::update()
         {
             for (int row = 0; row < char_height; ++row)
             {
-                displays_m.set_pixel(text_run_offset, row, 0x00ffffff);
+                // Draw appropriate caret style
+                if (overtype_m)
+                {
+                    // Cover entire character
+                    for (int column = 0; column < char_width; ++column)
+                    {
+                        int x = text_run_offset + column;
+                        int y = row;
+
+                        auto cur = displays_m.get_pixel(x, y);
+                        displays_m.set_pixel(x, y,
+                            edit_caret_visible_m ? 0x000f0f0f : cur);
+                    }
+                }
+                else
+                {
+                    // Cover leftmost column of character
+                    auto cur = displays_m.get_pixel(text_run_offset, row);
+                    displays_m.set_pixel(text_run_offset, row,
+                        edit_caret_visible_m ? 0x000f0f0f : cur);
+                }
             }
         }
 
         // Account for character dimensions in text run
         // This assumes text runs horizontally
         text_run_offset += char_width;
+    }
+
+    // HACK: Undo corresponding hack
+    if (editing_m)
+    {
+        text_len_m--;
     }
 
     // Flush the drawing buffer
