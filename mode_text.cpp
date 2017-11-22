@@ -29,13 +29,17 @@
 
 neo::mode_text::mode_text(input_ctrl& input_p, display_pair& displays_p)
         : mode(input_p, displays_p),
-          text_m {"$sD$tO$sP$tP$sL$tE$sR$t!"},
-          text_len_m(24),
+          text_m {"$sQ"},
+          text_len_m(3),
           current_obfuscated_char_m(' '),
           current_rainbow_color_a_m(DEFAULT_COLOR_FG),
           current_rainbow_driver_hue_m(0),
           marquee_enable_m(false),
-          marquee_step_m(0)
+          marquee_step_m(0),
+          editing_m(true),
+          overtype_m(false),
+          edit_caret_pos_m(0),
+          saved_m(true)
 {
 }
 
@@ -151,128 +155,148 @@ void neo::mode_text::update()
         // Get character value
         char char_text = text_m[char_idx];
 
-        // Match unescaped format escape character
-        if (char_text == '$' && !format_escape)
+        // If in rendered mode, handle formatting escapes
+        // The text color then indicates the save state
+        if (!editing_m)
         {
-            // Set format escape flag and move on to next character
-            format_escape = true;
-            continue;
-        }
-
-        if (format_escape)
-        {
-            // This character contributes to a formatting sequence
-            switch (char_text)
+            // Match unescaped format escape character
+            if (char_text == '$' && !format_escape)
             {
-            case '0':
-                // Set foreground color to black (clear on typical LED strips)
-                color_fg = 0x00000000;
-                goto escape_done;
-            case '1':
-                // Set foreground color to dark blue
-                color_fg = 0x000000aa;
-                goto escape_done;
-            case '2':
-                // Set foreground color to dark green
-                color_fg = 0x0000aa00;
-                goto escape_done;
-            case '3':
-                // Set foreground color to dark aqua
-                color_fg = 0x0000aaaa;
-                goto escape_done;
-            case '4':
-                // Set foreground color to dark red
-                color_fg = 0x00aa0000;
-                goto escape_done;
-            case '5':
-                // Set foreground color to dark purple
-                color_fg = 0x00aa00aa;
-                goto escape_done;
-            case '6':
-                // Set foreground color to gold
-                color_fg = 0x00ffaa00;
-                goto escape_done;
-            case '7':
-                // Set foreground color to gray (or less bright white)
-                color_fg = 0x00aaaaaa;
-                goto escape_done;
-            case '8':
-                // Set foreground color to dark gray (even less bright white)
-                color_fg = 0x00555555;
-                goto escape_done;
-            case '9':
-                // Set foreground color to blue
-                color_fg = 0x000000ff;
-                goto escape_done;
-            case 'a':
-            case 'A':
-                // Set foreground color to green
-                color_fg = 0x0000ff00;
-                goto escape_done;
-            case 'b':
-            case 'B':
-                // Set foreground color to aqua
-                color_fg = 0x0000ffff;
-                goto escape_done;
-            case 'c':
-            case 'C':
-                // Set foreground color to red
-                color_fg = 0x00ff0000;
-                goto escape_done;
-            case 'd':
-            case 'D':
-                // Set foreground color to light purple
-                color_fg = 0x00ff00ff;
-                goto escape_done;
-            case 'e':
-            case 'E':
-                // Set foreground color to yellow
-                color_fg = 0x00ffff00;
-                goto escape_done;
-            case 'f':
-            case 'F':
-                // Set foreground color to white
-                color_fg = 0x00ffffff;
-                goto escape_done;
-            case 'm':
-                // Enable marquee mode
-                // This is a global flag
-                marquee_enable_m = true;
-                goto escape_done;
-            case 'o':
-                // Enable obfuscated mode
-                mode_obfuscated = true;
-                goto escape_done;
-            case 'r':
-                // Reset a bunch of stuff
-                mode_obfuscated = false;
-                color_bg = DEFAULT_COLOR_BG;
-                color_fg = DEFAULT_COLOR_FG;
-                goto escape_done;
-            case 's':
-                // Rainbow mode A
-                // Set foreground color to rainbow A color
-                color_fg = current_rainbow_color_a_m;
-                goto escape_done;
-            case 't':
-                // Rainbow mode B
-                // Set foreground color to rainbow B color
-                color_fg = current_rainbow_color_b_m;
-                goto escape_done;
-            default:
-                goto escape_continue;
+                // Set format escape flag and move on to next character
+                format_escape = true;
+                continue;
             }
 
-        escape_done:
-            format_escape = false;
-        escape_continue:
-            continue;
-        }
+            if (format_escape)
+            {
+                // This character contributes to a formatting sequence
+                switch (char_text)
+                {
+                case '0':
+                    // Set foreground color to black (clear on typical LED strips)
+                    color_fg = 0x00000000;
+                    goto escape_done;
+                case '1':
+                    // Set foreground color to dark blue
+                    color_fg = 0x000000aa;
+                    goto escape_done;
+                case '2':
+                    // Set foreground color to dark green
+                    color_fg = 0x0000aa00;
+                    goto escape_done;
+                case '3':
+                    // Set foreground color to dark aqua
+                    color_fg = 0x0000aaaa;
+                    goto escape_done;
+                case '4':
+                    // Set foreground color to dark red
+                    color_fg = 0x00aa0000;
+                    goto escape_done;
+                case '5':
+                    // Set foreground color to dark purple
+                    color_fg = 0x00aa00aa;
+                    goto escape_done;
+                case '6':
+                    // Set foreground color to gold
+                    color_fg = 0x00ffaa00;
+                    goto escape_done;
+                case '7':
+                    // Set foreground color to gray (or less bright white)
+                    color_fg = 0x00aaaaaa;
+                    goto escape_done;
+                case '8':
+                    // Set foreground color to dark gray (even less bright white)
+                    color_fg = 0x00555555;
+                    goto escape_done;
+                case '9':
+                    // Set foreground color to blue
+                    color_fg = 0x000000ff;
+                    goto escape_done;
+                case 'a':
+                case 'A':
+                    // Set foreground color to green
+                    color_fg = 0x0000ff00;
+                    goto escape_done;
+                case 'b':
+                case 'B':
+                    // Set foreground color to aqua
+                    color_fg = 0x0000ffff;
+                    goto escape_done;
+                case 'c':
+                case 'C':
+                    // Set foreground color to red
+                    color_fg = 0x00ff0000;
+                    goto escape_done;
+                case 'd':
+                case 'D':
+                    // Set foreground color to light purple
+                    color_fg = 0x00ff00ff;
+                    goto escape_done;
+                case 'e':
+                case 'E':
+                    // Set foreground color to yellow
+                    color_fg = 0x00ffff00;
+                    goto escape_done;
+                case 'f':
+                case 'F':
+                    // Set foreground color to white
+                    color_fg = 0x00ffffff;
+                    goto escape_done;
+                case 'm':
+                    // Enable marquee mode
+                    // This is a global flag
+                    marquee_enable_m = true;
+                    goto escape_done;
+                case 'o':
+                    // Enable obfuscated mode
+                    mode_obfuscated = true;
+                    goto escape_done;
+                case 'r':
+                    // Reset a bunch of stuff
+                    mode_obfuscated = false;
+                    color_bg = DEFAULT_COLOR_BG;
+                    color_fg = DEFAULT_COLOR_FG;
+                    goto escape_done;
+                case 's':
+                    // Rainbow mode A
+                    // Set foreground color to rainbow A color
+                    color_fg = current_rainbow_color_a_m;
+                    goto escape_done;
+                case 't':
+                    // Rainbow mode B
+                    // Set foreground color to rainbow B color
+                    color_fg = current_rainbow_color_b_m;
+                    goto escape_done;
+                default:
+                    goto escape_continue;
+                }
 
-        // Handle obfuscated mode
-        if (mode_obfuscated)
+            escape_done:
+                format_escape = false;
+            escape_continue:
+                continue;
+            }
+
+            // Handle obfuscated mode
+            if (mode_obfuscated)
+            {
+                char_text = current_obfuscated_char_m;
+            }
+        }
+        else
         {
-            char_text = current_obfuscated_char_m;
+            // We are in edit mode at the moment
+            // Change text color based on save state
+            if (saved_m)
+            {
+                // Green for saved
+                color_fg = 0x0000ff00;
+            }
+            else
+            {
+                // Red for unsaved
+                color_fg = 0x00ff0000;
+            }
         }
 
         // Get character bitmap data and dimensions

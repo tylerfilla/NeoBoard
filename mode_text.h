@@ -92,11 +92,33 @@ private:
     bool marquee_enable_m;
 
     /**
-     * The marquee step counter. Will produce a yucky glitchy step once every
-     * 2^32 steps or until I stop being lazy and add a proper detection and
-     * mitigation strategy.
+     * The marquee step counter.
      */
     uint32_t marquee_step_m;
+
+    /**
+     * Whether we're in edit mode at the moment. If not, we're in rendered mode
+     * instead.
+     */
+    bool editing_m;
+
+    /**
+     * Whether we're in overtype mode at the moment. If not, we're in insert
+     * mode instead.
+     */
+    bool overtype_m;
+
+    /**
+     * The index of the edit caret. In insert mode, the caret is before the
+     * character with this index. In overtype mode, the caret os over the
+     * character with this index.
+     */
+    size_t edit_caret_pos_m;
+
+    /**
+     * Whether the text buffer is currently saved.
+     */
+    bool saved_m;
 
 public:
     mode_text(input_ctrl& input_p, display_pair& displays_p);
