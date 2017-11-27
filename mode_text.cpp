@@ -53,22 +53,43 @@ void neo::mode_text::insert_character(size_t index, char ch)
     if (text_len_m > TEXT_BUFFER_SIZE)
         return;
 
-    // If appending, simply tack it on
+    // If appending to existing text, simply tack it on
+    // Appending requires no movement
     if (index == text_len_m)
     {
         text_m[index] = ch;
     }
     else
     {
-        // Not appending, so move stuff out of the way
+        // Move characters after and including insertion point one character right
+        // This exposes a garbage character at the insertion point
         memmove(text_m + index + 1, text_m + index, text_len_m - index);
 
-        // Now add it in
+        // Fill in the insertion point with the desired character
         text_m[index] = ch;
     }
 
     // Increment text length
     text_len_m++;
+}
+
+void neo::mode_text::delete_character(size_t index)
+{
+    // Require at least one character in buffer
+    if (text_len_m == 0)
+        return;
+      
+    // If not deleting the last character
+    // Deleting the last character requires no movement
+    if (index < text_len_m - 1)
+    {
+        // Move characters after deletion point one character left
+        // This covers up the character to be deleted
+        memmove(text_m + index, text_m + index + 1, text_len_m - index);
+    }
+
+    // Decrement text length
+    text_len_m--;
 }
 
 static neo::mode_text::color_t compute_hue_color(int hue)
@@ -149,7 +170,15 @@ void neo::mode_text::update()
         if (input_m.btn_select() && input_m.btn_left_changed()
             && input_m.btn_left())
         {
-            // TODO: Backspace
+            // If there is a character behind the caret
+            if (edit_caret_pos_m > 0)
+            {
+                // Delete the character
+                delete_character(edit_caret_pos_m - 1);
+
+                // Shift the caret to the left
+                edit_caret_pos_m--;
+            }
         }
 
         // Handle dollar sign shortcut

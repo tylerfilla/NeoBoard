@@ -136,6 +136,11 @@ private:
      */
     void insert_character(size_t index, char ch);
 
+    /**
+     * Delete the character at the given index in the text buffer.
+     */
+    void delete_character(size_t index);
+
 public:
     mode_text(input_ctrl& input_p, display_pair& displays_p);
 
