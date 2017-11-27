@@ -31,8 +31,8 @@
 
 neo::mode_text::mode_text(input_ctrl& input_p, display_pair& displays_p)
         : mode(input_p, displays_p),
-          text_m {"$sQ"},
-          text_len_m(3),
+          text_m {"$sTEST"},
+          text_len_m(6),
           current_obfuscated_char_m(' '),
           current_rainbow_color_a_m(DEFAULT_COLOR_FG),
           current_rainbow_driver_hue_m(0),
@@ -284,7 +284,7 @@ void neo::mode_text::update()
     }
 
     //
-    // Handle Edit State
+    // Handle Editor State
     //
 
     // Handle edit caret blink
@@ -355,28 +355,31 @@ void neo::mode_text::update()
     // Flag indicating obfuscated mode
     bool mode_obfuscated = false;
 
-    // HACK: If editing, pretend there's an extra character
-    // This will be used later to allow the edit caret to go one past the end
+    // The text to display this frame
+    // Also get its corresponding length
+    const char* text = text_m;
+    size_t text_len = text_len_m;
+
+    // When editing, allow edit caret to go one past the end
     if (editing_m)
     {
-        text_len_m++;
+        text_len++;
     }
 
-    for (size_t char_idx = 0; char_idx < text_len_m; ++char_idx)
+    for (size_t char_idx = 0; char_idx < text_len; ++char_idx)
     {
-        // This particular character
-        char char_text;
+        char ch;
 
         // If editing and we're one past the end
-        if (editing_m && char_idx == text_len_m - 1)
+        if (editing_m && char_idx == text_len - 1)
         {
             // Display a space (i.e. nothing)
-            char_text = ' ';
+            ch = ' ';
         }
         else
         {
             // Get the real character
-            char_text = text_m[char_idx];
+            ch = text[char_idx];
         }
 
         // If in rendered mode, handle formatting escapes
@@ -384,7 +387,7 @@ void neo::mode_text::update()
         if (!editing_m)
         {
             // Match unescaped format escape character
-            if (char_text == '$' && !format_escape)
+            if (ch == '$' && !format_escape)
             {
                 // Set format escape flag and move on to next character
                 format_escape = true;
@@ -394,7 +397,7 @@ void neo::mode_text::update()
             if (format_escape)
             {
                 // This character contributes to a formatting sequence
-                switch (char_text)
+                switch (ch)
                 {
                 case '0':
                     // Set foreground color to black (clear on typical LED strips)
@@ -508,7 +511,7 @@ void neo::mode_text::update()
             // Handle obfuscated mode
             if (mode_obfuscated)
             {
-                char_text = current_obfuscated_char_m;
+                ch = current_obfuscated_char_m;
             }
         }
         else
@@ -530,19 +533,19 @@ void neo::mode_text::update()
         // Get character bitmap data and dimensions
         // Use the character value itself as an index into the font buffer
         // This is incredibly primitive, but it satisfies requirements
-        auto char_bitmap = font::data[static_cast<size_t>(char_text)];
+        auto char_bitmap = font::data[static_cast<size_t>(ch)];
         auto char_height = font::height;
         auto char_width = font::width;
 
-        for (int column = 0; column < char_width; ++column)
+        for (int col = 0; col < char_width; ++col)
         {
             // Get column data
-            auto column_data = char_bitmap[column];
+            auto col_data = char_bitmap[col];
 
             for (int row = 0; row < char_height; ++row)
             {
                 // Get pixel coordinates on logical drawing surface
-                int x = text_run_offset + column;
+                int x = text_run_offset + col;
                 int y = font::height - row - 1;
 
                 // Handle marquee animation if not editing
@@ -560,7 +563,7 @@ void neo::mode_text::update()
 
                 // Determine the color to be applied to this pixel
                 // Use foreground color for text and background color everywhere else
-                auto color = ((column_data >> row) & 1) ? color_fg : color_bg;
+                auto color = ((col_data >> row) & 1) ? color_fg : color_bg;
 
                 // Buffer the pixel color
                 displays_m.set_pixel(x, y, color);
@@ -576,9 +579,9 @@ void neo::mode_text::update()
                 if (overtype_m)
                 {
                     // Cover entire character
-                    for (int column = 0; column < char_width; ++column)
+                    for (int col = 0; col < char_width; ++col)
                     {
-                        int x = text_run_offset + column;
+                        int x = text_run_offset + col;
                         int y = row;
 
                         auto cur = displays_m.get_pixel(x, y);
@@ -588,7 +591,7 @@ void neo::mode_text::update()
                 }
                 else
                 {
-                    // Cover leftmost column of character
+                    // Cover leftmost col of character
                     auto cur = displays_m.get_pixel(text_run_offset, row);
                     displays_m.set_pixel(text_run_offset, row,
                         edit_caret_visible_m ? 0x000f0f0f : cur);
@@ -599,12 +602,6 @@ void neo::mode_text::update()
         // Account for character dimensions in text run
         // This assumes text runs horizontally
         text_run_offset += char_width;
-    }
-
-    // HACK: Undo corresponding hack
-    if (editing_m)
-    {
-        text_len_m--;
     }
 
     // Flush the drawing buffer
