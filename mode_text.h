@@ -97,6 +97,17 @@ private:
     uint32_t marquee_step_m;
 
     /**
+     * The current flash state.
+     */
+    bool flash_state_m;
+
+    /**
+     * The time, in uptime milliseconds, at which the flash state should be
+     * toggled.
+     */
+    unsigned long flash_timer_m;
+
+    /**
      * Whether we're in edit mode at the moment. If not, we're in rendered mode
      * instead.
      */

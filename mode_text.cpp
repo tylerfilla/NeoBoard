@@ -29,15 +29,22 @@
 #include "input_ctrl.h"
 #include "mode_text.h"
 
+#define RENDERED_EFFECT_FLASH_DELAY_ON 500
+#define RENDERED_EFFECT_FLASH_DELAY_OFF 250
+#define EDIT_CARET_BLINK_DELAY 250
+#define EDIT_CARET_DUCK_DELAY 750
+
 neo::mode_text::mode_text(input_ctrl& input_p, display_pair& displays_p)
         : mode(input_p, displays_p),
-          text_m {"$sTEST"},
-          text_len_m(6),
+          text_m {"$m$u$sC$tA$sN$tD$sY"},
+          text_len_m(19),
           current_obfuscated_char_m(' '),
           current_rainbow_color_a_m(DEFAULT_COLOR_FG),
           current_rainbow_driver_hue_m(0),
           marquee_enable_m(false),
           marquee_step_m(0),
+          flash_state_m(false),
+          flash_timer_m(0),
           editing_m(false),
           overtype_m(true),
           edit_caret_pos_m(0),
@@ -201,7 +208,8 @@ void neo::mode_text::update()
             // Show the caret immediately
             // This gives a solid text editor feel
             edit_caret_visible_m = true;
-            edit_caret_blink_timer_m = neo::clock::uptime_millis() + 250;
+            edit_caret_blink_timer_m = neo::clock::uptime_millis()
+                + EDIT_CARET_BLINK_DELAY;
         }
         else if (input_m.btn_right_changed() && input_m.btn_right())
         {
@@ -220,7 +228,8 @@ void neo::mode_text::update()
             // Show the caret immediately
             // This gives a solid text editor feel
             edit_caret_visible_m = true;
-            edit_caret_blink_timer_m = neo::clock::uptime_millis() + 250;
+            edit_caret_blink_timer_m = neo::clock::uptime_millis()
+                + EDIT_CARET_BLINK_DELAY;
         }
 
         // Handle character editing
@@ -284,7 +293,8 @@ void neo::mode_text::update()
 
                 // Temporarily hide the caret for an extended time
                 edit_caret_visible_m = false;
-                edit_caret_blink_timer_m = neo::clock::uptime_millis() + 750;
+                edit_caret_blink_timer_m = neo::clock::uptime_millis()
+                    + EDIT_CARET_DUCK_DELAY;
             }
             else
             {
@@ -320,7 +330,8 @@ void neo::mode_text::update()
     if (neo::clock::uptime_millis() >= edit_caret_blink_timer_m)
     {
         edit_caret_visible_m = !edit_caret_visible_m;
-        edit_caret_blink_timer_m = neo::clock::uptime_millis() + 250;
+        edit_caret_blink_timer_m = neo::clock::uptime_millis()
+            + EDIT_CARET_BLINK_DELAY;
     }
 
     //
@@ -362,6 +373,28 @@ void neo::mode_text::update()
     }
 
     //
+    // Handle Flashing
+    //
+
+    // Handle flash state toggle
+    if (neo::clock::uptime_millis() >= flash_timer_m)
+    {
+        flash_state_m = !flash_state_m;
+
+        // Apply delay based on new state
+        if (flash_state_m)
+        {
+            flash_timer_m = neo::clock::uptime_millis()
+                + RENDERED_EFFECT_FLASH_DELAY_ON;
+        }
+        else
+        {
+            flash_timer_m = neo::clock::uptime_millis()
+                + RENDERED_EFFECT_FLASH_DELAY_OFF;
+        }
+    }
+
+    //
     // Draw the Frame
     //
 
@@ -381,8 +414,9 @@ void neo::mode_text::update()
     // The cumulative offset to apply to subsequent text characters
     int text_run_offset = 0;
 
-    // Flag indicating obfuscated mode
+    // Scoped render effect modes
     bool mode_obfuscated = false;
+    bool mode_flash = false;
 
     // The text to display this frame
     // Also get its corresponding length
@@ -506,7 +540,7 @@ void neo::mode_text::update()
                     goto escape_done;
                 case 'o':
                 case 'O':
-                    // Enable obfuscated mode
+                    // Enable scoped obfuscated (glitter) mode
                     mode_obfuscated = true;
                     goto escape_done;
                 case 'r':
@@ -527,6 +561,11 @@ void neo::mode_text::update()
                     // Rainbow mode B
                     // Set foreground color to rainbow B color
                     color_fg = current_rainbow_color_b_m;
+                    goto escape_done;
+                case 'u':
+                case 'U':
+                    // Enable scoped flashing mode
+                    mode_flash = true;
                     goto escape_done;
                 default:
                     goto escape_done;
@@ -593,6 +632,17 @@ void neo::mode_text::update()
                 // Determine the color to be applied to this pixel
                 // Use foreground color for text and background color everywhere else
                 auto color = ((col_data >> row) & 1) ? color_fg : color_bg;
+
+                // If this character is affected by global flash state
+                if (mode_flash)
+                {
+                    // If global flash state says NO!
+                    if (!flash_state_m)
+                    {
+                        // There will be no light
+                        color = 0;
+                    }
+                }
 
                 // Buffer the pixel color
                 displays_m.set_pixel(x, y, color);
