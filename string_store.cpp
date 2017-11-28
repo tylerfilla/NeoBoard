@@ -34,8 +34,7 @@ bool neo::string_store::get(uint32_t index, size_t length, char* out_string)
     // Copy string from EEPROM
     for (size_t i = 0; i < length; ++i)
     {
-        auto ssize = neo::string_store::STRING_SIZE;
-        out_string[i] = EEPROM[index * ssize + i];
+        out_string[i] = EEPROM[index * STRING_SIZE + i];
     }
 
     return true;
@@ -54,8 +53,7 @@ bool neo::string_store::put(const char* string, size_t length, uint32_t index)
     // Copy string into EEPROM with trailing zeroes
     for (size_t i = 0; i < STRING_SIZE; ++i)
     {
-        auto ssize = neo::string_store::STRING_SIZE;
-        EEPROM[index * ssize + i] = i < length ? string[i] : '\0';
+        EEPROM[index * STRING_SIZE + i] = i < length ? string[i] : '\0';
     }
 
     return true;

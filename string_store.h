@@ -40,6 +40,12 @@ namespace string_store
 constexpr auto STRING_SIZE = 128;
 
 /**
+ * Total number of strings in the store. This whole project is based off the
+ * Arduino Uno, which offers 1024 bytes of EEPROM.
+ */
+constexpr auto NUM_STRINGS = 1024 / STRING_SIZE;
+
+/**
  * Copy the string at the given index from the store.
  */
 bool get(uint32_t index, size_t length, char* out_string);

@@ -143,6 +143,11 @@ private:
     bool saved_m;
 
     /**
+     * The index of the current saved string in the string store.
+     */
+    uint32_t save_index_m;
+
+    /**
      * Insert the given character at the given index in the text buffer.
      */
     void insert_character(size_t index, char ch);
@@ -151,6 +156,17 @@ private:
      * Delete the character at the given index in the text buffer.
      */
     void delete_character(size_t index);
+
+    /**
+     * Load or reload the string identified by the current save index.
+     */
+    void load_string();
+
+    /**
+     * Save the current text buffer into the string store at the current save
+     * index.
+     */
+    void save_string();
 
 public:
     mode_text(input_ctrl& input_p, display_pair& displays_p);
