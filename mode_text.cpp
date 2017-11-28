@@ -115,6 +115,9 @@ void neo::mode_text::insert_character(size_t index, char ch)
 
     // Increment text length
     text_len_m++;
+
+    // Mark buffer unsaved
+    saved_m = false;
 }
 
 void neo::mode_text::delete_character(size_t index)
@@ -134,6 +137,9 @@ void neo::mode_text::delete_character(size_t index)
 
     // Decrement text length
     text_len_m--;
+
+    // Mark buffer unsaved
+    saved_m = false;
 }
 
 void neo::mode_text::load_string()
@@ -402,10 +408,29 @@ void neo::mode_text::update()
             editing_m = true;
             overtype_m = true;
 
-            // Skip this update
             return;
         }
 
+        // Handle erase the current string
+        if (input_m.btn_select() && input_m.btn_down_changed()
+            && input_m.btn_down())
+        {
+            // If the current string is empty and saved, do nothing
+            if (text_len_m == 0 && saved_m)
+                return;
+
+            // Fake an unsaved erasure
+            memset(text_m, 0, TEXT_BUFFER_SIZE);
+            text_len_m = 0;
+            saved_m = false;
+
+            // And then save it
+            save_string();
+
+            return;
+        }
+
+        // Handle switch to string left
         if (input_m.btn_left_changed() && input_m.btn_left())
         {
             // If another string exists to the left
@@ -417,11 +442,11 @@ void neo::mode_text::update()
                 // Load the new string
                 load_string();
 
-                // Skip this update
                 return;
             }
         }
 
+        // Handle switch to string right
         if (input_m.btn_right_changed() && input_m.btn_right())
         {
             // If another string exists to the right
@@ -433,7 +458,6 @@ void neo::mode_text::update()
                 // Load the new string
                 load_string();
 
-                // Skip this update
                 return;
             }
         }
