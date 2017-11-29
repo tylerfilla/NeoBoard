@@ -70,6 +70,11 @@ private:
     bool stacked_m;
 
     /**
+     * Determine if a point is visible on either panel.
+     */
+    bool is_point_visible(dim_t x, dim_t y) const;
+
+    /**
      * Get whichever panel has the given point on the drawing surface.
      */
     display_panel& panel_for_point(dim_t x, dim_t y, dim_t& out_px,
