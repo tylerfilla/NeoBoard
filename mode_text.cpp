@@ -746,6 +746,26 @@ void neo::mode_text::update()
         auto char_height = font::height;
         auto char_width = font::width;
 
+        // The total number of visible characters
+        // This is used to calculate horizontal scroll offset for editing
+        // We assume one blank to demonstrate a past-the-end overtype caret
+        auto total_visible_chars = displays_m.surface_width() / char_width;
+
+        // Offset to apply to text to provide editor scrolling
+        int horiz_scroll_offset = 0;
+
+        // If buffer length exceeds total visible string length
+        if (text_len_m > total_visible_chars - 1)
+        {
+            // If edit caret is not on the first "page"
+            if (edit_caret_pos_m > total_visible_chars - 1)
+            {
+                // Apply an offset to put edit caret at last position
+                horiz_scroll_offset = char_width * (edit_caret_pos_m
+                    - total_visible_chars + 1);
+            }
+        }
+
         for (int col = 0; col < char_width; ++col)
         {
             // Get column data
@@ -754,7 +774,7 @@ void neo::mode_text::update()
             for (int row = 0; row < char_height; ++row)
             {
                 // Get pixel coordinates on logical drawing surface
-                int x = text_run_offset + col;
+                int x = text_run_offset + col - horiz_scroll_offset;
                 int y = font::height - row - 1;
 
                 // Handle marquee animation if not editing
@@ -801,7 +821,7 @@ void neo::mode_text::update()
                     // Cover entire character
                     for (int col = 0; col < char_width; ++col)
                     {
-                        int x = text_run_offset + col;
+                        int x = text_run_offset + col - horiz_scroll_offset;
                         int y = row;
 
                         auto cur = displays_m.get_pixel(x, y);
@@ -811,9 +831,10 @@ void neo::mode_text::update()
                 }
                 else
                 {
-                    // Cover leftmost col of character
-                    auto cur = displays_m.get_pixel(text_run_offset, row);
-                    displays_m.set_pixel(text_run_offset, row,
+                    // Cover leftmost column of character
+                    int col = text_run_offset - horiz_scroll_offset;
+                    auto cur = displays_m.get_pixel(col, row);
+                    displays_m.set_pixel(col, row,
                         edit_caret_visible_m ? 0x000f0f0f : cur);
                 }
             }
