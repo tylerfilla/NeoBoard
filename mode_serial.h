@@ -18,32 +18,35 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MODE_DEMO_H
-#define MODE_DEMO_H
+#ifndef MODE_SERIAL_H
+#define MODE_SERIAL_H
 
 #include "mode.h"
 
 namespace neo
 {
 
+class mode_text;
+
 /**
- * A mode for introduction and friendly startups.
+ * A serial interface mode. If you have a computer handy, this is faster than
+ * the built-in editor interface.
  */
-class mode_demo : public mode
+class mode_serial : public mode
 {
     /**
-     * The current mode being demoed at the moment.
+     * A text mode instance for indication purposes.
      */
-    mode* mode_shown_m;
+    mode_text* indicator_text_m;
 
 public:
-    mode_demo(input_ctrl& input_p, display_pair& displays_p);
+    mode_serial(input_ctrl& input_p, display_pair& displays_p);
 
-    ~mode_demo() override;
+    ~mode_serial() override;
 
     void update() override;
 };
 
 } // namespace neo
 
-#endif // #ifndef MODE_DEMO_H
+#endif // #ifndef MODE_SERIAL_H

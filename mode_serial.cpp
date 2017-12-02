@@ -18,32 +18,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MODE_DEMO_H
-#define MODE_DEMO_H
+#include <Arduino.h>
 
-#include "mode.h"
+#include "display_pair.h"
+#include "display_panel.h"
+#include "input_ctrl.h"
+#include "mode_serial.h"
+#include "mode_text.h"
 
-namespace neo
+#define DEFAULT_BAUD 9600
+
+neo::mode_serial::mode_serial(input_ctrl& input_p, display_pair& displays_p)
+        : mode(input_p, displays_p),
+          indicator_text_m(new mode_text(input_p, displays_p))
 {
+    // Open serial communication
+    Serial.begin(DEFAULT_BAUD);
+}
 
-/**
- * A mode for introduction and friendly startups.
- */
-class mode_demo : public mode
+neo::mode_serial::~mode_serial()
 {
-    /**
-     * The current mode being demoed at the moment.
-     */
-    mode* mode_shown_m;
+    // Close serial communication
+    Serial.end();
 
-public:
-    mode_demo(input_ctrl& input_p, display_pair& displays_p);
+    if (indicator_text_m)
+        delete indicator_text_m;
+}
 
-    ~mode_demo() override;
-
-    void update() override;
-};
-
-} // namespace neo
-
-#endif // #ifndef MODE_DEMO_H
+void neo::mode_serial::update()
+{
+    Serial.println("boop");
+}
