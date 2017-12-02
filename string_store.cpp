@@ -21,6 +21,20 @@
 #include <EEPROM.h>
 #include "string_store.h"
 
+bool neo::string_store::erase(uint32_t index)
+{
+    if (index > EEPROM.length() / STRING_SIZE)
+        return false;
+
+    // Fill string with nulls
+    for (size_t i = 0; i < STRING_SIZE; ++i)
+    {
+        EEPROM[index * STRING_SIZE + i] = '\0';
+    }
+
+    return true;
+}
+
 bool neo::string_store::get(uint32_t index, size_t length, char* out_string)
 {
     if (index > EEPROM.length() / STRING_SIZE)

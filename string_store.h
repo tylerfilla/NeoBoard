@@ -46,6 +46,11 @@ constexpr auto STRING_SIZE = 128;
 constexpr auto NUM_STRINGS = 1024 / STRING_SIZE;
 
 /**
+ * Erase the string at the given index in the store.
+ */
+bool erase(uint32_t index);
+
+/**
  * Copy the string at the given index from the store.
  */
 bool get(uint32_t index, size_t length, char* out_string);

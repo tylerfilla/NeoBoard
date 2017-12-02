@@ -21,6 +21,7 @@
 #ifndef MODE_SERIAL_H
 #define MODE_SERIAL_H
 
+#include <stddef.h>
 #include "mode.h"
 
 namespace neo
@@ -34,13 +35,67 @@ class mode_text;
  */
 class mode_serial : public mode
 {
+public:
+    /**
+     * The size of the line buffer.
+     */
+    static constexpr auto LINE_BUFFER_SIZE = 256;
+
+private:
     /**
      * A text mode instance for indication purposes.
      */
-    mode_text* indicator_text_m;
+    mode_text* m_indicator_text;
+
+    /**
+     * The line buffer to hold the current input line. Not null-terminated.
+     */
+    char m_line_buffer[LINE_BUFFER_SIZE];
+
+    /**
+     * The length of the text currently stored in the line buffer.
+     */
+    size_t m_line_buffer_len;
+
+    /**
+     * Whether text should be echoed back to the client.
+     */
+    bool m_echo;
+
+    /**
+     * Whether the client has been prompted.
+     */
+    bool m_prompted;
+
+    /**
+     * Command: crash
+     * Crash the Arduino for science.
+     */
+    void cmd_crash();
+
+    /**
+     * Command: strings
+     * Test the connection (as if it weren't already known).
+     */
+    void cmd_ping();
+
+    /**
+     * Command: strings
+     * Edit text in the string store.
+     */
+    void cmd_strings();
+
+    /**
+     * Usage for strings command.
+     */
+    void cmd_usage_strings();
+
+    void print_root_help();
+
+    void exec_command();
 
 public:
-    mode_serial(input_ctrl& input_p, display_pair& displays_p);
+    mode_serial(input_ctrl& p_input, display_pair& p_displays);
 
     ~mode_serial() override;
 

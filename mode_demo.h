@@ -34,10 +34,10 @@ class mode_demo : public mode
     /**
      * The current mode being demoed at the moment.
      */
-    mode* mode_shown_m;
+    mode* m_submode;
 
 public:
-    mode_demo(input_ctrl& input_p, display_pair& displays_p);
+    mode_demo(input_ctrl& p_input, display_pair& p_displays);
 
     ~mode_demo() override;
 

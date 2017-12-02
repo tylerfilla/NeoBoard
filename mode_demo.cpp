@@ -24,35 +24,35 @@
 #include "mode_demo.h"
 #include "mode_serial.h"
 
-neo::mode_demo::mode_demo(input_ctrl& input_p, display_pair& displays_p)
-        : mode(input_p, displays_p),
-          mode_shown_m(nullptr)
+neo::mode_demo::mode_demo(input_ctrl& p_input, display_pair& p_displays)
+        : mode(p_input, p_displays)
+        , m_submode(nullptr)
 {
 }
 
 neo::mode_demo::~mode_demo()
 {
-    if (mode_shown_m)
-        delete mode_shown_m;
+    if (m_submode)
+        delete m_submode;
 }
 
 void neo::mode_demo::update()
 {
     // Handle drop into serial mode
     if (input_m.btn_select() && input_m.btn_down_changed()
-        && input_m.btn_down())
+            && input_m.btn_down())
     {
         // Remove currently shown mode
-        if (mode_shown_m)
-            delete mode_shown_m;
+        if (m_submode)
+            delete m_submode;
 
         // Drop into serial mode
-        mode_shown_m = new mode_serial(input_m, displays_m);
+        m_submode = new mode_serial(input_m, displays_m);
     }
 
     // Forward update to backing mode
-    if (mode_shown_m)
+    if (m_submode)
     {
-        mode_shown_m->update();
+        m_submode->update();
     }
 }
