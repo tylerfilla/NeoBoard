@@ -229,6 +229,21 @@ void neo::mode_serial::update()
             // Get byte
             char byte = Serial.read();
 
+            // Handle backspace
+            // This removes the last character and re-prompts
+            if (byte == 8)
+            {
+                if (m_line_buffer_len > 0)
+                {
+                    m_line_buffer_len--;
+                    Serial.println();
+                    Serial.print("> ");
+                    Serial.write(m_line_buffer, m_line_buffer_len);
+                }
+                return;
+            }
+
+            // Handle carriage return
             if (byte == '\r')
             {
                 Serial.println();
