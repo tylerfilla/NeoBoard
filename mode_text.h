@@ -21,6 +21,7 @@
 #ifndef MODE_TEXT_H
 #define MODE_TEXT_H
 
+#include <stddef.h>
 #include "mode.h"
 
 namespace neo

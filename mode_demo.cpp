@@ -22,10 +22,20 @@
 #include "display_panel.h"
 #include "input_ctrl.h"
 #include "mode_demo.h"
+#include "mode_egg.h"
+#include "mode_text.h"
 
 neo::mode_demo::mode_demo(input_ctrl& input_p, display_pair& displays_p)
-        : mode(input_p, displays_p)
+        : mode(input_p, displays_p),
+          mode_egg_m(new mode_egg(input_p, displays_p)),
+          mode_text_m(new mode_text(input_p, displays_p))
 {
+}
+
+neo::mode_demo::~mode_demo()
+{
+    delete mode_egg_m;
+    delete mode_text_m;
 }
 
 void neo::mode_demo::update()

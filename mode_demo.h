@@ -26,13 +26,28 @@
 namespace neo
 {
 
+class mode_egg;
+class mode_text;
+
 /**
  * A mode for introduction and friendly startups.
  */
 class mode_demo : public mode
 {
+    /**
+     * The underlying ???.
+     */
+    mode_egg* mode_egg_m;
+
+    /**
+     * The underlying text mode.
+     */
+    mode_text* mode_text_m;
+
 public:
     mode_demo(input_ctrl& input_p, display_pair& displays_p);
+
+    ~mode_demo() override;
 
     void update() override;
 };

@@ -18,8 +18,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MODE_DEMO_H
-#define MODE_DEMO_H
+#ifndef MODE_EGG_H
+#define MODE_EGG_H
 
 #include "mode.h"
 
@@ -27,7 +27,7 @@ namespace neo
 {
 
 /**
- * 
+ * ???
  */
 class mode_egg : public mode
 {
