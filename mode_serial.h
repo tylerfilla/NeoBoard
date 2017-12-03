@@ -22,12 +22,12 @@
 #define MODE_SERIAL_H
 
 #include <stddef.h>
+
 #include "mode.h"
+#include "mode_text.h"
 
 namespace neo
 {
-
-class mode_text;
 
 /**
  * A serial interface mode. If you have a computer handy, this is faster than
@@ -39,13 +39,13 @@ public:
     /**
      * The size of the line buffer.
      */
-    static constexpr auto LINE_BUFFER_SIZE = 256;
+    static constexpr auto LINE_BUFFER_SIZE = 128;
 
 private:
     /**
      * A text mode instance for indication purposes.
      */
-    mode_text* m_indicator_text;
+    mode_text m_indicator_text;
 
     /**
      * The line buffer to hold the current input line. Not null-terminated.
@@ -80,17 +80,16 @@ private:
     void cmd_ping();
 
     /**
+     * Command: show
+     * Show the given text string on the display.
+     */
+    void cmd_show();
+
+    /**
      * Command: strings
      * Edit text in the string store.
      */
     void cmd_strings();
-
-    /**
-     * Usage for strings command.
-     */
-    void cmd_usage_strings();
-
-    void print_root_help();
 
     void exec_command();
 

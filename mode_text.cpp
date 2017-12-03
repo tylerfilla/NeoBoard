@@ -35,24 +35,25 @@
 #define EDIT_CARET_BLINK_DELAY 250
 #define EDIT_CARET_DUCK_DELAY 750
 
-neo::mode_text::mode_text(input_ctrl& input_p, display_pair& displays_p)
-        : mode(input_p, displays_p),
-          text_m {""},
-          text_len_m(0),
-          current_obfuscated_char_m(' '),
-          current_rainbow_color_a_m(DEFAULT_COLOR_FG),
-          current_rainbow_driver_hue_m(0),
-          marquee_enable_m(false),
-          marquee_step_m(0),
-          flash_state_m(false),
-          flash_timer_m(0),
-          editing_m(false),
-          overtype_m(true),
-          edit_caret_pos_m(0),
-          edit_caret_visible_m(true),
-          edit_caret_blink_timer_m(0),
-          saved_m(true),
-          save_index_m(0)
+neo::mode_text::mode_text(input_ctrl& p_input, display_pair& p_displays)
+        : mode(p_input, p_displays)
+        , m_text {}
+        , m_text_len(0)
+        , m_current_obfuscated_char(' ')
+        , m_current_rainbow_color_a(DEFAULT_COLOR_FG)
+        , m_current_rainbow_color_b(DEFAULT_COLOR_FG)
+        , m_current_rainbow_driver_hue(0)
+        , m_marquee_enable(false)
+        , m_marquee_step(0)
+        , m_flash_state(false)
+        , m_flash_timer(0)
+        , m_editing(false)
+        , m_overtype(true)
+        , m_edit_caret_pos(0)
+        , m_edit_caret_visible(true)
+        , m_edit_caret_blink_timer(0)
+        , m_saved(true)
+        , m_save_index(0)
 {
     // Find first nonempty string
     while (true)
@@ -60,19 +61,19 @@ neo::mode_text::mode_text(input_ctrl& input_p, display_pair& displays_p)
         load_string();
 
         // Try next string
-        if (text_len_m == 0)
+        if (m_text_len == 0)
         {
-            save_index_m++;
+            m_save_index++;
 
             // If the end has been reached
-            if (save_index_m == neo::string_store::NUM_STRINGS - 1)
+            if (m_save_index == neo::string_store::NUM_STRINGS - 1)
             {
                 // Go to the first string
-                save_index_m = 0;
+                m_save_index = 0;
 
                 // Drop to edit mode, overtype
-                editing_m = true;
-                overtype_m = true;
+                m_editing = true;
+                m_overtype = true;
 
                 // Stop here
                 break;
@@ -94,81 +95,81 @@ neo::mode_text::mode_text(input_ctrl& input_p, display_pair& displays_p)
 void neo::mode_text::insert_character(size_t index, char ch)
 {
     // Don't exceed buffer size
-    if (text_len_m > TEXT_BUFFER_SIZE)
+    if (m_text_len > TEXT_BUFFER_SIZE)
         return;
 
     // If appending to existing text, simply tack it on
     // Appending requires no movement
-    if (index == text_len_m)
+    if (index == m_text_len)
     {
-        text_m[index] = ch;
+        m_text[index] = ch;
     }
     else
     {
         // Move characters after and including insertion point one character right
         // This exposes a garbage character at the insertion point
-        memmove(text_m + index + 1, text_m + index, text_len_m - index);
+        memmove(m_text + index + 1, m_text + index, m_text_len - index);
 
         // Fill in the insertion point with the desired character
-        text_m[index] = ch;
+        m_text[index] = ch;
     }
 
     // Increment text length
-    text_len_m++;
+    m_text_len++;
 
     // Mark buffer unsaved
-    saved_m = false;
+    m_saved = false;
 }
 
 void neo::mode_text::delete_character(size_t index)
 {
     // Require at least one character in buffer
-    if (text_len_m == 0)
+    if (m_text_len == 0)
         return;
       
     // If not deleting the last character
     // Deleting the last character requires no movement
-    if (index < text_len_m - 1)
+    if (index < m_text_len - 1)
     {
         // Move characters after deletion point one character left
         // This covers up the character to be deleted
-        memmove(text_m + index, text_m + index + 1, text_len_m - index);
+        memmove(m_text + index, m_text + index + 1, m_text_len - index);
     }
 
     // Decrement text length
-    text_len_m--;
+    m_text_len--;
 
     // Mark buffer unsaved
-    saved_m = false;
+    m_saved = false;
 }
 
 void neo::mode_text::load_string()
 {
     // Copy target string from string store into text buffer
     // This overwrites all text currently in the buffer, even unsaved changes!
-    neo::string_store::get(save_index_m, TEXT_BUFFER_SIZE, text_m);
+    neo::string_store::get(m_save_index, TEXT_BUFFER_SIZE, m_text);
 
     // Find the length of the string
-    text_len_m = strlen(text_m);
+    m_text_len = strlen(m_text);
 
     // Flag as saved
-    saved_m = true;
+    m_saved = true;
 
     // HACK: Disable marquee animation
-    marquee_enable_m = false;
+    m_marquee_enable = false;
 }
 
 void neo::mode_text::save_string()
 {
     // Quick sanity check
-    if (text_len_m > TEXT_BUFFER_SIZE)
+    if (m_text_len > TEXT_BUFFER_SIZE)
         return;
 
     // Copy string from text buffer into string store
-    neo::string_store::put(text_m, text_len_m, save_index_m);
+    neo::string_store::put(m_text, m_text_len, m_save_index);
 
     // Flag as saved
-    saved_m = true;
+    m_saved = true;
 }
 
 static neo::mode_text::color_t compute_hue_color(int hue)
@@ -222,7 +223,7 @@ void neo::mode_text::update()
     //
 
     // Handle edit mode-specific input
-    if (editing_m)
+    if (m_editing)
     {
         //
         // Edit Mode Input
@@ -233,13 +234,13 @@ void neo::mode_text::update()
             && input_m.btn_up())
         {
             // Save the text buffer if unsaved
-            if (!saved_m)
+            if (!m_saved)
             {
                 save_string();
             }
 
             // Leave edit mode
-            editing_m = false;
+            m_editing = false;
 
             // Skip this update
             return;
@@ -250,7 +251,7 @@ void neo::mode_text::update()
             && input_m.btn_down())
         {
             // Toggle overtype
-            overtype_m = !overtype_m;
+            m_overtype = !m_overtype;
         }
 
         // Handle backspace
@@ -258,13 +259,13 @@ void neo::mode_text::update()
             && input_m.btn_left())
         {
             // If there is a character behind the caret
-            if (edit_caret_pos_m > 0)
+            if (m_edit_caret_pos > 0)
             {
                 // Delete the character
-                delete_character(edit_caret_pos_m - 1);
+                delete_character(m_edit_caret_pos - 1);
 
                 // Shift the caret to the left
-                edit_caret_pos_m--;
+                m_edit_caret_pos--;
             }
         }
 
@@ -274,41 +275,41 @@ void neo::mode_text::update()
             && input_m.btn_right())
         {
             // Insert a dollar sign
-            insert_character(edit_caret_pos_m, '$');
+            insert_character(m_edit_caret_pos, '$');
         }
 
         // Handle caret movement
         if (input_m.btn_left_changed() && input_m.btn_left())
         {
-            if (--edit_caret_pos_m < 0)
+            if (--m_edit_caret_pos < 0)
             {
-                edit_caret_pos_m = 0;
+                m_edit_caret_pos = 0;
             }
 
             // Show the caret immediately
             // This gives a solid text editor feel
-            edit_caret_visible_m = true;
-            edit_caret_blink_timer_m = neo::clock::uptime_millis()
+            m_edit_caret_visible = true;
+            m_edit_caret_blink_timer = neo::clock::uptime_millis()
                 + EDIT_CARET_BLINK_DELAY;
         }
         else if (input_m.btn_right_changed() && input_m.btn_right())
         {
             // Allow caret to go one past the end
-            if (++edit_caret_pos_m >= text_len_m + 1)
+            if (++m_edit_caret_pos >= m_text_len + 1)
             {
-                edit_caret_pos_m = text_len_m;
+                m_edit_caret_pos = m_text_len;
             }
 
             // Do not allow caret to exceed the text buffer size
-            if (edit_caret_pos_m >= TEXT_BUFFER_SIZE)
+            if (m_edit_caret_pos >= TEXT_BUFFER_SIZE)
             {
-                edit_caret_pos_m = TEXT_BUFFER_SIZE - 1;
+                m_edit_caret_pos = TEXT_BUFFER_SIZE - 1;
             }
 
             // Show the caret immediately
             // This gives a solid text editor feel
-            edit_caret_visible_m = true;
-            edit_caret_blink_timer_m = neo::clock::uptime_millis()
+            m_edit_caret_visible = true;
+            m_edit_caret_blink_timer = neo::clock::uptime_millis()
                 + EDIT_CARET_BLINK_DELAY;
         }
 
@@ -316,81 +317,81 @@ void neo::mode_text::update()
         if (input_m.btn_up_changed() && input_m.btn_up())
         {
             // If in overtype mode, edit character under caret
-            if (overtype_m)
+            if (m_overtype)
             {
                 // If caret is positioned to append a character
-                if (edit_caret_pos_m == text_len_m)
+                if (m_edit_caret_pos == m_text_len)
                 {
                     // Shortcut: Add in a new character here
-                    insert_character(edit_caret_pos_m, 'Z');
+                    insert_character(m_edit_caret_pos, 'Z');
                 }
                 else
                 {
                     // Decrement existing character (in Z to A direction)
-                    text_m[edit_caret_pos_m]--;
-                    if (!isprint(text_m[edit_caret_pos_m]))
+                    m_text[m_edit_caret_pos]--;
+                    if (!isprint(m_text[m_edit_caret_pos]))
                     {
                         // Lowest important printable ASCII character
-                        text_m[edit_caret_pos_m] = ' ';
+                        m_text[m_edit_caret_pos] = ' ';
                     }
                 }
 
                 // Flag buffer as unsaved
-                saved_m = false;
+                m_saved = false;
 
                 // Temporarily hide the caret for an extended time
-                edit_caret_visible_m = false;
-                edit_caret_blink_timer_m = neo::clock::uptime_millis()
+                m_edit_caret_visible = false;
+                m_edit_caret_blink_timer = neo::clock::uptime_millis()
                     + EDIT_CARET_DUCK_DELAY;
             }
             else
             {
                 // Currently in insert mode
                 // Insert a suitable starting character
-                insert_character(edit_caret_pos_m, 'Z');
+                insert_character(m_edit_caret_pos, 'Z');
 
                 // Drop back to overtype
-                overtype_m = true;
+                m_overtype = true;
             }
         }
         else if (input_m.btn_down_changed() && input_m.btn_down())
         {
             // If in overtype mode, edit character under caret
-            if (overtype_m)
+            if (m_overtype)
             {
                 // If caret is positioned to append a character
-                if (edit_caret_pos_m == text_len_m)
+                if (m_edit_caret_pos == m_text_len)
                 {
                     // Shortcut: Add in a new character here
-                    insert_character(edit_caret_pos_m, 'A');
+                    insert_character(m_edit_caret_pos, 'A');
                 }
                 else
                 {
                     // Increment existing character (in A to Z direction)
-                    text_m[edit_caret_pos_m]++;
-                    if (!isprint(text_m[edit_caret_pos_m]))
+                    m_text[m_edit_caret_pos]++;
+                    if (!isprint(m_text[m_edit_caret_pos]))
                     {
                         // Highest important printable ASCII character
-                        text_m[edit_caret_pos_m] = '~';
+                        m_text[m_edit_caret_pos] = '~';
                     }
                 }
 
                 // Flag buffer as unsaved
-                saved_m = false;
+                m_saved = false;
 
                 // Temporarily hide the caret for an extended time
-                edit_caret_visible_m = false;
-                edit_caret_blink_timer_m = neo::clock::uptime_millis()
+                m_edit_caret_visible = false;
+                m_edit_caret_blink_timer = neo::clock::uptime_millis()
                     + EDIT_CARET_DUCK_DELAY;
             }
             else
             {
                 // Currently in insert mode
                 // Insert a suitable starting character
-                insert_character(edit_caret_pos_m, 'A');
+                insert_character(m_edit_caret_pos, 'A');
 
                 // Drop back to overtype
-                overtype_m = true;
+                m_overtype = true;
             }
         }
     }
@@ -405,8 +406,8 @@ void neo::mode_text::update()
             && input_m.btn_up())
         {
             // Enter edit mode
-            editing_m = true;
-            overtype_m = true;
+            m_editing = true;
+            m_overtype = true;
 
             return;
         }
@@ -416,13 +417,13 @@ void neo::mode_text::update()
             && input_m.btn_down())
         {
             // If the current string is empty and saved, do nothing
-            if (text_len_m == 0 && saved_m)
+            if (m_text_len == 0 && m_saved)
                 return;
 
             // Fake an unsaved erasure
-            memset(text_m, 0, TEXT_BUFFER_SIZE);
-            text_len_m = 0;
-            saved_m = false;
+            memset(m_text, 0, TEXT_BUFFER_SIZE);
+            m_text_len = 0;
+            m_saved = false;
 
             // And then save it
             save_string();
@@ -434,10 +435,10 @@ void neo::mode_text::update()
         if (input_m.btn_left_changed() && input_m.btn_left())
         {
             // If another string exists to the left
-            if (save_index_m > 0)
+            if (m_save_index > 0)
             {
                 // Decrement (move left) the save index
-                save_index_m--;
+                m_save_index--;
 
                 // Load the new string
                 load_string();
@@ -450,10 +451,10 @@ void neo::mode_text::update()
         if (input_m.btn_right_changed() && input_m.btn_right())
         {
             // If another string exists to the right
-            if (save_index_m < neo::string_store::NUM_STRINGS - 1)
+            if (m_save_index < neo::string_store::NUM_STRINGS - 1)
             {
                 // Increment (move right) the save index
-                save_index_m++;
+                m_save_index++;
 
                 // Load the new string
                 load_string();
@@ -468,10 +469,10 @@ void neo::mode_text::update()
     //
 
     // Handle edit caret blink
-    if (neo::clock::uptime_millis() >= edit_caret_blink_timer_m)
+    if (neo::clock::uptime_millis() >= m_edit_caret_blink_timer)
     {
-        edit_caret_visible_m = !edit_caret_visible_m;
-        edit_caret_blink_timer_m = neo::clock::uptime_millis()
+        m_edit_caret_visible = !m_edit_caret_visible;
+        m_edit_caret_blink_timer = neo::clock::uptime_millis()
             + EDIT_CARET_BLINK_DELAY;
     }
 
@@ -480,27 +481,27 @@ void neo::mode_text::update()
     //
 
     // Increment rainbow driver hue
-    current_rainbow_driver_hue_m += 3;
-    current_rainbow_driver_hue_m %= 360;
+    m_current_rainbow_driver_hue += 3;
+    m_current_rainbow_driver_hue %= 360;
 
     // Find hues for both rainbow channels
-    int rainbow_hue_a = current_rainbow_driver_hue_m;
-    int rainbow_hue_b = (current_rainbow_driver_hue_m + 180) % 360;
+    int rainbow_hue_a = m_current_rainbow_driver_hue;
+    int rainbow_hue_b = (m_current_rainbow_driver_hue + 180) % 360;
 
     // Compute RGB colors for fully-saturated, half-lit variants of these hues
     // FIXME: Only need to compute what's necessary for each frame
-    current_rainbow_color_a_m = compute_hue_color(rainbow_hue_a);
-    current_rainbow_color_b_m = compute_hue_color(rainbow_hue_b);
+    m_current_rainbow_color_a = compute_hue_color(rainbow_hue_a);
+    m_current_rainbow_color_b = compute_hue_color(rainbow_hue_b);
 
     //
     // Handle Obfuscated Text
     //
 
     // Change obfuscated character
-    current_obfuscated_char_m = 0;
-    while (!isprint(current_obfuscated_char_m))
+    m_current_obfuscated_char = 0;
+    while (!isprint(m_current_obfuscated_char))
     {
-        current_obfuscated_char_m = rand() % 128;
+        m_current_obfuscated_char = rand() % 128;
     }
 
     //
@@ -508,9 +509,9 @@ void neo::mode_text::update()
     //
 
     // Step the marquee forward, if enabled
-    if (marquee_enable_m)
+    if (m_marquee_enable)
     {
-        marquee_step_m += 10;
+        m_marquee_step += 10;
     }
 
     //
@@ -518,19 +519,19 @@ void neo::mode_text::update()
     //
 
     // Handle flash state toggle
-    if (neo::clock::uptime_millis() >= flash_timer_m)
+    if (neo::clock::uptime_millis() >= m_flash_timer)
     {
-        flash_state_m = !flash_state_m;
+        m_flash_state = !m_flash_state;
 
         // Apply delay based on new state
-        if (flash_state_m)
+        if (m_flash_state)
         {
-            flash_timer_m = neo::clock::uptime_millis()
+            m_flash_timer = neo::clock::uptime_millis()
                 + RENDERED_EFFECT_FLASH_DELAY_ON;
         }
         else
         {
-            flash_timer_m = neo::clock::uptime_millis()
+            m_flash_timer = neo::clock::uptime_millis()
                 + RENDERED_EFFECT_FLASH_DELAY_OFF;
         }
     }
@@ -561,11 +562,11 @@ void neo::mode_text::update()
 
     // The text to display this frame
     // Also get its corresponding length
-    const char* text = text_m;
-    size_t text_len = text_len_m;
+    const char* text = m_text;
+    size_t text_len = m_text_len;
 
     // When editing, allow edit caret to go one past the end
-    if (editing_m)
+    if (m_editing)
     {
         text_len++;
     }
@@ -575,7 +576,7 @@ void neo::mode_text::update()
         char ch;
 
         // If editing and we're one past the end
-        if (editing_m && char_idx == text_len - 1)
+        if (m_editing && char_idx == text_len - 1)
         {
             // Display a space (i.e. nothing)
             ch = ' ';
@@ -588,7 +589,7 @@ void neo::mode_text::update()
 
         // If in rendered mode, handle formatting escapes
         // The text color then indicates the save state
-        if (!editing_m)
+        if (!m_editing)
         {
             // Match unescaped format escape character
             if (ch == '$' && !format_escape)
@@ -677,7 +678,7 @@ void neo::mode_text::update()
                 case 'M':
                     // Enable marquee mode
                     // This is a global flag
-                    marquee_enable_m = true;
+                    m_marquee_enable = true;
                     goto escape_done;
                 case 'o':
                 case 'O':
@@ -695,13 +696,13 @@ void neo::mode_text::update()
                 case 'S':
                     // Rainbow mode A
                     // Set foreground color to rainbow A color
-                    color_fg = current_rainbow_color_a_m;
+                    color_fg = m_current_rainbow_color_a;
                     goto escape_done;
                 case 't':
                 case 'T':
                     // Rainbow mode B
                     // Set foreground color to rainbow B color
-                    color_fg = current_rainbow_color_b_m;
+                    color_fg = m_current_rainbow_color_b;
                     goto escape_done;
                 case 'u':
                 case 'U':
@@ -720,14 +721,14 @@ void neo::mode_text::update()
             // Handle obfuscated mode
             if (mode_obfuscated)
             {
-                ch = current_obfuscated_char_m;
+                ch = m_current_obfuscated_char;
             }
         }
         else
         {
             // We are in edit mode at the moment
             // Change text color based on save state
-            if (saved_m)
+            if (m_saved)
             {
                 // Green for saved
                 color_fg = 0x0000ff00;
@@ -755,13 +756,13 @@ void neo::mode_text::update()
         int horiz_scroll_offset = 0;
 
         // If buffer length exceeds total visible string length
-        if (text_len_m > total_visible_chars - 1)
+        if (m_text_len > total_visible_chars - 1)
         {
             // If edit caret is not on the first "page"
-            if (edit_caret_pos_m > total_visible_chars - 1)
+            if (m_edit_caret_pos > total_visible_chars - 1)
             {
                 // Apply an offset to put edit caret at last position
-                horiz_scroll_offset = char_width * (edit_caret_pos_m
+                horiz_scroll_offset = char_width * (m_edit_caret_pos
                     - total_visible_chars + 1);
             }
         }
@@ -778,9 +779,9 @@ void neo::mode_text::update()
                 int y = font::height - row - 1;
 
                 // Handle marquee animation if not editing
-                if (marquee_enable_m && !editing_m)
+                if (m_marquee_enable && !m_editing)
                 {
-                    x -= marquee_step_m / 100;
+                    x -= m_marquee_step / 100;
 
                     // Wrap x into proper range
                     while (x < 0)
@@ -798,7 +799,7 @@ void neo::mode_text::update()
                 if (mode_flash)
                 {
                     // If global flash state says NO!
-                    if (!flash_state_m)
+                    if (!m_flash_state)
                     {
                         // There will be no light
                         color = 0;
@@ -811,12 +812,12 @@ void neo::mode_text::update()
         }
 
         // Render edit caret in edit mode
-        if (editing_m && char_idx == edit_caret_pos_m)
+        if (m_editing && char_idx == m_edit_caret_pos)
         {
             for (int row = 0; row < char_height; ++row)
             {
                 // Draw appropriate caret style
-                if (overtype_m)
+                if (m_overtype)
                 {
                     // Cover entire character
                     for (int col = 0; col < char_width; ++col)
@@ -826,7 +827,7 @@ void neo::mode_text::update()
 
                         auto cur = displays_m.get_pixel(x, y);
                         displays_m.set_pixel(x, y,
-                            edit_caret_visible_m ? 0x000f0f0f : cur);
+                            m_edit_caret_visible ? 0x000f0f0f : cur);
                     }
                 }
                 else
@@ -835,7 +836,7 @@ void neo::mode_text::update()
                     int col = text_run_offset - horiz_scroll_offset;
                     auto cur = displays_m.get_pixel(col, row);
                     displays_m.set_pixel(col, row,
-                        edit_caret_visible_m ? 0x000f0f0f : cur);
+                        m_edit_caret_visible ? 0x000f0f0f : cur);
                 }
             }
         }
@@ -847,4 +848,17 @@ void neo::mode_text::update()
 
     // Flush the drawing buffer
     displays_m.surface_flush();
+}
+
+void neo::mode_text::show_string(const char* str, size_t len)
+{
+    if (len > TEXT_BUFFER_SIZE)
+    {
+        len = TEXT_BUFFER_SIZE;
+    }
+
+    // Copy the string over
+    memcpy(m_text, str, len);
+    m_text[len] = '\0';
+    m_text_len = len;
 }

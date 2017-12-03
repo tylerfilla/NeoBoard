@@ -34,28 +34,26 @@
 
 neo::mode_serial::mode_serial(input_ctrl& p_input, display_pair& p_displays)
         : mode(p_input, p_displays)
-        , m_indicator_text(new mode_text(p_input, p_displays))
+        , m_indicator_text(p_input, p_displays)
         , m_line_buffer {}
         , m_line_buffer_len(0)
         , m_echo(true)
         , m_prompted(false)
 {
+    // Indicate serial mode
+    m_indicator_text.show_string("SER", 3);
+
     // Open serial communication
     Serial.begin(DEFAULT_BAUD);
 
     // Print header
     Serial.println("NeoBoard Serial Interface");
-    Serial.println("Send \"?\" for help");
-    Serial.println();
 }
 
 neo::mode_serial::~mode_serial()
 {
     // Close serial communication
     Serial.end();
-
-    if (m_indicator_text)
-        delete m_indicator_text;
 }
 
 void neo::mode_serial::cmd_crash()
@@ -72,14 +70,26 @@ void neo::mode_serial::cmd_ping()
     Serial.println("pong!");
 }
 
+void neo::mode_serial::cmd_show()
+{
+    // Get string index
+    uint32_t index = atoi(m_line_buffer + 5);
+
+    // Get and print string
+    char str[neo::string_store::STRING_SIZE];
+    if (neo::string_store::get(index, neo::string_store::STRING_SIZE, str))
+    {
+        m_indicator_text.show_string(str, strlen(str));
+        Serial.println("ok");
+    }
+    else
+    {
+        Serial.println("failed");
+    }
+}
+
 void neo::mode_serial::cmd_strings()
 {
-    if (strcmp(m_line_buffer, "strings") == 0)
-    {
-        cmd_usage_strings();
-        return;
-    }
-
     if (strncmp(m_line_buffer + 8, "count", 5) == 0)
     {
         Serial.print("strings: ");
@@ -89,12 +99,6 @@ void neo::mode_serial::cmd_strings()
     }
     else if (strncmp(m_line_buffer + 8, "erase", 5) == 0)
     {
-        if (m_line_buffer_len == 13)
-        {
-            Serial.println("usage: strings erase <num>");
-            return;
-        }
-
         // Get string index
         uint32_t index = atoi(m_line_buffer + 14);
 
@@ -110,12 +114,6 @@ void neo::mode_serial::cmd_strings()
     }
     else if (strncmp(m_line_buffer + 8, "get", 3) == 0)
     {
-        if (m_line_buffer_len == 11)
-        {
-            Serial.println("usage: strings get <num>");
-            return;
-        }
-
         // Get string index
         uint32_t index = atoi(m_line_buffer + 12);
 
@@ -132,12 +130,6 @@ void neo::mode_serial::cmd_strings()
     }
     else if (strncmp(m_line_buffer + 8, "put", 3) == 0)
     {
-        if (m_line_buffer_len == 11)
-        {
-            Serial.println("usage: strings put <num> <text>");
-            return;
-        }
-
         // Get string index
         uint32_t index = atoi(m_line_buffer + 12);
 
@@ -174,33 +166,22 @@ void neo::mode_serial::cmd_strings()
     }
 }
 
-void neo::mode_serial::cmd_usage_strings()
-{
-    Serial.println("usage: strings <action> [options...]");
-    Serial.println("actions: count, erase, get, put");
-}
-
-void neo::mode_serial::print_root_help()
-{
-    Serial.println("?, crash, ping, strings");
-}
-
 void neo::mode_serial::exec_command()
 {
     if (m_line_buffer_len == 0)
         return;
 
-    if (strncmp(m_line_buffer, "?", 1) == 0)
-    {
-        print_root_help();
-    }
-    else if (strncmp(m_line_buffer, "crash", 4) == 0)
+    if (strncmp(m_line_buffer, "crash", 4) == 0)
     {
         cmd_crash();
     }
     else if (strncmp(m_line_buffer, "ping", 4) == 0)
     {
         cmd_ping();
+    }
+    else if (strncmp(m_line_buffer, "show", 4) == 0)
+    {
+        cmd_show();
     }
     else if (strncmp(m_line_buffer, "strings", 7) == 0)
     {
@@ -222,6 +203,9 @@ void neo::mode_serial::exec_command()
 
 void neo::mode_serial::update()
 {
+    // Update the indicator text
+    m_indicator_text.update();
+
     if (m_prompted)
     {
         if (Serial.available() > 0)

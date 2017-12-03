@@ -59,94 +59,105 @@ private:
      * The active text buffer. Plain ol' ASCII with some special in-band
      * formatting sequences for your viewing pleasure. Not null-terminated.
      */
-    char text_m[TEXT_BUFFER_SIZE];
+    char m_text[TEXT_BUFFER_SIZE];
 
     /**
      * The length of the text string currently active in the buffer. This
      * includes formatting sequences.
      */
-    size_t text_len_m;
+    size_t m_text_len;
 
     /**
      * The current substitute for obfuscated characters.
      */
-    char current_obfuscated_char_m;
+    char m_current_obfuscated_char;
 
     /**
      * The current rainbow A color.
      */
-    color_t current_rainbow_color_a_m;
+    color_t m_current_rainbow_color_a;
 
     /**
      * The current rainbow B color.
      */
-    color_t current_rainbow_color_b_m;
+    color_t m_current_rainbow_color_b;
 
     /**
      * The current rainbow hue used to drive both rainbow colors.
      */
-    int current_rainbow_driver_hue_m;
+    int m_current_rainbow_driver_hue;
 
     /**
      * Whether to enable marquee mode.
      */
-    bool marquee_enable_m;
+    bool m_marquee_enable;
 
     /**
      * The marquee step counter.
      */
-    uint32_t marquee_step_m;
+    uint32_t m_marquee_step;
 
     /**
      * The current flash state.
      */
-    bool flash_state_m;
+    bool m_flash_state;
 
     /**
      * The time, in uptime milliseconds, at which the flash state should be
      * toggled.
      */
-    unsigned long flash_timer_m;
+    unsigned long m_flash_timer;
 
     /**
      * Whether we're in edit mode at the moment. If not, we're in rendered mode
      * instead.
      */
-    bool editing_m;
+    bool m_editing;
 
     /**
      * Whether we're in overtype mode at the moment. If not, we're in insert
      * mode instead.
      */
-    bool overtype_m;
+    bool m_overtype;
 
     /**
      * The index of the edit caret. In insert mode, the caret is before the
      * character with this index. In overtype mode, the caret os over the
      * character with this index.
      */
-    long edit_caret_pos_m;
+    long m_edit_caret_pos;
 
     /**
      * Whether the edit caret is momentarily visible.
      */
-    bool edit_caret_visible_m;
+    bool m_edit_caret_visible;
 
     /**
      * The time, in uptime milliseconds, at which the edit caret should be
      * toggled.
      */
-    unsigned long edit_caret_blink_timer_m;
+    unsigned long m_edit_caret_blink_timer;
 
     /**
      * Whether the text buffer is currently saved.
      */
-    bool saved_m;
+    bool m_saved;
 
     /**
      * The index of the current saved string in the string store.
      */
-    uint32_t save_index_m;
+    uint32_t m_save_index;
+
+public:
+    mode_text(input_ctrl& p_input, display_pair& p_displays);
+
+    inline const char* text() const
+    { return m_text; }
+
+    inline size_t text_len() const
+    { return m_text_len; }
+
+    void update() override;
 
     /**
      * Insert the given character at the given index in the text buffer.
@@ -169,16 +180,10 @@ private:
      */
     void save_string();
 
-public:
-    mode_text(input_ctrl& input_p, display_pair& displays_p);
-
-    inline const char* text() const
-    { return text_m; }
-
-    inline size_t text_len() const
-    { return text_len_m; }
-
-    void update() override;
+    /**
+     * Show the given text string directly.
+     */
+    void show_string(const char* str, size_t len);
 };
 
 } // namespace neo
