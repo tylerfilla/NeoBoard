@@ -20,8 +20,8 @@
 
 #include "mode.h"
 
-neo::mode::mode(input_ctrl& input_p, display_pair& displays_p)
-        : displays_m(displays_p),
-          input_m(input_p)
+neo::mode::mode(input_ctrl& p_input, display_pair& p_displays)
+        : m_displays(p_displays)
+        , m_input(p_input)
 {
 }

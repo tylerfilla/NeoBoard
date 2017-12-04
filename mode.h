@@ -36,16 +36,16 @@ protected:
     /**
      * The target display group.
      */
-    display_pair& displays_m;
+    display_pair& m_displays;
 
     /**
      * The input control array.
      */
-    input_ctrl& input_m;
+    input_ctrl& m_input;
 
-    mode(input_ctrl& input_p, display_pair& displays_p);
+    mode(input_ctrl& p_input, display_pair& p_displays);
 
-    mode(mode& mode_p);
+    mode(mode& p_mode);
 
 public:
     virtual ~mode() = default;

@@ -39,15 +39,15 @@ neo::mode_demo::~mode_demo()
 void neo::mode_demo::update()
 {
     // Handle drop into serial mode
-    if (input_m.btn_select() && input_m.btn_down_changed()
-            && input_m.btn_down())
+    if (m_input.btn_select() && m_input.btn_down_changed()
+            && m_input.btn_down())
     {
         // Remove currently shown mode
         if (m_submode)
             delete m_submode;
 
         // Drop into serial mode
-        m_submode = new mode_serial(input_m, displays_m);
+        m_submode = new mode_serial(m_input, m_displays);
     }
 
     // Forward update to backing mode

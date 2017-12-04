@@ -230,8 +230,8 @@ void neo::mode_text::update()
         //
 
         // Handle save and exit
-        if (input_m.btn_select() && input_m.btn_up_changed()
-            && input_m.btn_up())
+        if (m_input.btn_select() && m_input.btn_up_changed()
+            && m_input.btn_up())
         {
             // Save the text buffer if unsaved
             if (!m_saved)
@@ -247,16 +247,16 @@ void neo::mode_text::update()
         }
 
         // Handle toggle overtype
-        if (input_m.btn_select() && input_m.btn_down_changed()
-            && input_m.btn_down())
+        if (m_input.btn_select() && m_input.btn_down_changed()
+            && m_input.btn_down())
         {
             // Toggle overtype
             m_overtype = !m_overtype;
         }
 
         // Handle backspace
-        if (input_m.btn_select() && input_m.btn_left_changed()
-            && input_m.btn_left())
+        if (m_input.btn_select() && m_input.btn_left_changed()
+            && m_input.btn_left())
         {
             // If there is a character behind the caret
             if (m_edit_caret_pos > 0)
@@ -271,15 +271,15 @@ void neo::mode_text::update()
 
         // Handle dollar sign shortcut
         // This is useful for entering formatting commands
-        if (input_m.btn_select() && input_m.btn_right_changed()
-            && input_m.btn_right())
+        if (m_input.btn_select() && m_input.btn_right_changed()
+            && m_input.btn_right())
         {
             // Insert a dollar sign
             insert_character(m_edit_caret_pos, '$');
         }
 
         // Handle caret movement
-        if (input_m.btn_left_changed() && input_m.btn_left())
+        if (m_input.btn_left_changed() && m_input.btn_left())
         {
             if (--m_edit_caret_pos < 0)
             {
@@ -292,7 +292,7 @@ void neo::mode_text::update()
             m_edit_caret_blink_timer = neo::clock::uptime_millis()
                 + EDIT_CARET_BLINK_DELAY;
         }
-        else if (input_m.btn_right_changed() && input_m.btn_right())
+        else if (m_input.btn_right_changed() && m_input.btn_right())
         {
             // Allow caret to go one past the end
             if (++m_edit_caret_pos >= m_text_len + 1)
@@ -314,7 +314,7 @@ void neo::mode_text::update()
         }
 
         // Handle character editing
-        if (input_m.btn_up_changed() && input_m.btn_up())
+        if (m_input.btn_up_changed() && m_input.btn_up())
         {
             // If in overtype mode, edit character under caret
             if (m_overtype)
@@ -354,7 +354,7 @@ void neo::mode_text::update()
                 m_overtype = true;
             }
         }
-        else if (input_m.btn_down_changed() && input_m.btn_down())
+        else if (m_input.btn_down_changed() && m_input.btn_down())
         {
             // If in overtype mode, edit character under caret
             if (m_overtype)
@@ -402,8 +402,8 @@ void neo::mode_text::update()
         //
 
         // Handle switch to edit mode in insert mode
-        if (input_m.btn_select() && input_m.btn_up_changed()
-            && input_m.btn_up())
+        if (m_input.btn_select() && m_input.btn_up_changed()
+            && m_input.btn_up())
         {
             // Enter edit mode
             m_editing = true;
@@ -413,8 +413,8 @@ void neo::mode_text::update()
         }
 
         // Handle erase the current string
-        if (input_m.btn_select() && input_m.btn_down_changed()
-            && input_m.btn_down())
+        if (m_input.btn_select() && m_input.btn_down_changed()
+            && m_input.btn_down())
         {
             // If the current string is empty and saved, do nothing
             if (m_text_len == 0 && m_saved)
@@ -432,7 +432,7 @@ void neo::mode_text::update()
         }
 
         // Handle switch to string left
-        if (input_m.btn_left_changed() && input_m.btn_left())
+        if (m_input.btn_left_changed() && m_input.btn_left())
         {
             // If another string exists to the left
             if (m_save_index > 0)
@@ -448,7 +448,7 @@ void neo::mode_text::update()
         }
 
         // Handle switch to string right
-        if (input_m.btn_right_changed() && input_m.btn_right())
+        if (m_input.btn_right_changed() && m_input.btn_right())
         {
             // If another string exists to the right
             if (m_save_index < neo::string_store::NUM_STRINGS - 1)
@@ -541,7 +541,7 @@ void neo::mode_text::update()
     //
 
     // Clear the drawing surface
-    displays_m.surface_clear();
+    m_displays.surface_clear();
 
     // Alias the one and only font
     namespace font = neo::font::pixely;
@@ -750,7 +750,7 @@ void neo::mode_text::update()
         // The total number of visible characters
         // This is used to calculate horizontal scroll offset for editing
         // We assume one blank to demonstrate a past-the-end overtype caret
-        auto total_visible_chars = displays_m.surface_width() / char_width;
+        auto total_visible_chars = m_displays.surface_width() / char_width;
 
         // Offset to apply to text to provide editor scrolling
         int horiz_scroll_offset = 0;
@@ -786,9 +786,9 @@ void neo::mode_text::update()
                     // Wrap x into proper range
                     while (x < 0)
                     {
-                        x += displays_m.surface_width();
+                        x += m_displays.surface_width();
                     }
-                    x %= displays_m.surface_width();
+                    x %= m_displays.surface_width();
                 }
 
                 // Determine the color to be applied to this pixel
@@ -807,7 +807,7 @@ void neo::mode_text::update()
                 }
 
                 // Buffer the pixel color
-                displays_m.set_pixel(x, y, color);
+                m_displays.set_pixel(x, y, color);
             }
         }
 
@@ -825,8 +825,8 @@ void neo::mode_text::update()
                         int x = text_run_offset + col - horiz_scroll_offset;
                         int y = row;
 
-                        auto cur = displays_m.get_pixel(x, y);
-                        displays_m.set_pixel(x, y,
+                        auto cur = m_displays.get_pixel(x, y);
+                        m_displays.set_pixel(x, y,
                             m_edit_caret_visible ? 0x000f0f0f : cur);
                     }
                 }
@@ -834,8 +834,8 @@ void neo::mode_text::update()
                 {
                     // Cover leftmost column of character
                     int col = text_run_offset - horiz_scroll_offset;
-                    auto cur = displays_m.get_pixel(col, row);
-                    displays_m.set_pixel(col, row,
+                    auto cur = m_displays.get_pixel(col, row);
+                    m_displays.set_pixel(col, row,
                         m_edit_caret_visible ? 0x000f0f0f : cur);
                 }
             }
@@ -847,7 +847,7 @@ void neo::mode_text::update()
     }
 
     // Flush the drawing buffer
-    displays_m.surface_flush();
+    m_displays.surface_flush();
 }
 
 void neo::mode_text::show_string(const char* str, size_t len)
