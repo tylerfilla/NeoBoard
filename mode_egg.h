@@ -37,9 +37,19 @@ class mode_egg : public mode
     static constexpr auto SNAKE_MAX_SIZE = 32;
 
     /**
+     * The game tick number.
+     */
+    unsigned long m_tick;
+
+    /**
      * The time of the last game tick.
      */
     unsigned long m_last_tick_time;
+
+    /**
+     * Entropy collected from the user to seed gameplay randomness.
+     */
+    unsigned int m_entropy;
 
     /**
      * Whether the current game has been initialized.

@@ -35,6 +35,11 @@ namespace clock
  */
 unsigned long uptime_millis();
 
+/**
+ * Wait for the specified number of milliseconds.
+ */
+unsigned long delay_millis(unsigned long millis);
+
 } // namespace clock
 
 } // namespace neo

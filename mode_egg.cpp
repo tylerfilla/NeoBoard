@@ -28,7 +28,9 @@
 
 neo::mode_egg::mode_egg(input_ctrl& p_input, display_pair& p_displays)
         : mode(p_input, p_displays)
+        , m_tick(0)
         , m_last_tick_time(0)
+        , m_entropy(0)
         , m_game_initialized(false)
         , m_ctrl_h(0)
         , m_ctrl_v(0)
@@ -47,8 +49,6 @@ void neo::mode_egg::tick()
     //
     // Game Logic
     //
-
-    // TODO: Collect entropy from the player
 
     // If not done already, initialize the game
     if (!m_game_initialized)
@@ -111,14 +111,25 @@ void neo::mode_egg::tick()
                 m_snake[0].m_pos_x += m_vel_x;
                 m_snake[0].m_pos_y += m_vel_y;
 
-                // Check for snake self-intersection
+                // Check for snake self-collision
                 for (int j = 1; j < m_snake_len; ++j)
                 {
                     // If the head just hit another snake part
                     if (m_snake[0].m_pos_x == m_snake[j].m_pos_x
                             && m_snake[0].m_pos_y == m_snake[j].m_pos_y)
                     {
-                        // FIXME
+                        // Highlight the collision
+                        for (int k = 0; k < 6; ++k)
+                        {
+                            m_displays.set_pixel(m_snake[0].m_pos_x, m_snake[0].m_pos_y, 0x00000000);
+                            m_displays.surface_flush();
+                            neo::clock::delay_millis(200);
+                            m_displays.set_pixel(m_snake[0].m_pos_x, m_snake[0].m_pos_y, 0x0000ff00);
+                            m_displays.surface_flush();
+                            neo::clock::delay_millis(200);
+                        }
+
+                        // Reset the game
                         m_game_initialized = false;
                         return;
                     }
@@ -180,9 +191,16 @@ void neo::mode_egg::tick()
 
 void neo::mode_egg::update()
 {
+    // Time of update
+    unsigned long current_time = neo::clock::uptime_millis();
+
     // Handle directional controls
     if (m_input.btn_up_changed())
     {
+        // Contribute to game entropy
+        m_entropy ^= current_time ^ m_tick;
+
+        // Handle up button state
         if (m_input.btn_up())
         {
             m_ctrl_v--;
@@ -194,6 +212,10 @@ void neo::mode_egg::update()
     }
     if (m_input.btn_down_changed())
     {
+        // Contribute to game entropy
+        m_entropy ^= current_time ^ m_tick;
+
+        // Handle down button state
         if (m_input.btn_down())
         {
             m_ctrl_v++;
@@ -205,6 +227,10 @@ void neo::mode_egg::update()
     }
     if (m_input.btn_left_changed())
     {
+        // Contribute to game entropy
+        m_entropy ^= current_time ^ m_tick;
+
+        // Handle left button state
         if (m_input.btn_left())
         {
             m_ctrl_h--;
@@ -216,6 +242,10 @@ void neo::mode_egg::update()
     }
     if (m_input.btn_right_changed())
     {
+        // Contribute to game entropy
+        m_entropy ^= current_time ^ m_tick;
+
+        // Handle right button state
         if (m_input.btn_right())
         {
             m_ctrl_h++;
@@ -240,10 +270,17 @@ void neo::mode_egg::update()
     }
 
     // Handle game tick
-    unsigned long current_time = neo::clock::uptime_millis();
     if (m_last_tick_time == 0 || current_time - m_last_tick_time > 250)
     {
         m_last_tick_time = current_time;
+        m_tick++;
+
+        // Seed game entropy every 5 ticks
+        if (m_tick % 5 == 0)
+        {
+            srand(m_entropy);
+        }
+
         tick();
     }
 }

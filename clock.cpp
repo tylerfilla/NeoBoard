@@ -25,3 +25,9 @@ unsigned long neo::clock::uptime_millis()
 {
     return millis();
 }
+
+unsigned long neo::clock::delay_millis(unsigned long millis)
+{
+    delay(millis);
+    return millis;
+}
