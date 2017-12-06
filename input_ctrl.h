@@ -81,35 +81,35 @@ class input_ctrl
     bool btn_select_changed_m;
 
 public:
-    bool btn_up();
+    bool btn_up(int skim = 0);
 
     input_ctrl& btn_up(bool btn_up_p);
 
     inline bool btn_up_changed() const
     { return btn_up_changed_m; }
 
-    bool btn_down();
+    bool btn_down(int skim = 0);
 
     input_ctrl& btn_down(bool btn_down_p);
 
     inline bool btn_down_changed() const
     { return btn_down_changed_m; }
 
-    bool btn_left();
+    bool btn_left(int skim = 0);
 
     input_ctrl& btn_left(bool btn_left_p);
 
     inline bool btn_left_changed() const
     { return btn_left_changed_m; }
 
-    bool btn_right();
+    bool btn_right(int skim = 0);
 
     input_ctrl& btn_right(bool btn_right_p);
 
     inline bool btn_right_changed() const
     { return btn_right_changed_m; }
 
-    bool btn_select();
+    bool btn_select(int skim = 0);
 
     input_ctrl& btn_select(bool btn_select_p);
 

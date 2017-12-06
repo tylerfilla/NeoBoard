@@ -22,11 +22,14 @@
 #include "display_panel.h"
 #include "input_ctrl.h"
 #include "mode_demo.h"
+#include "mode_egg.h"
 #include "mode_serial.h"
+#include "mode_text.h"
 
 neo::mode_demo::mode_demo(input_ctrl& p_input, display_pair& p_displays)
         : mode(p_input, p_displays)
-        , m_submode(nullptr)
+        , m_submode(new neo::mode_text(p_input, p_displays))
+        , m_secret_progress(0)
 {
 }
 
@@ -38,15 +41,69 @@ neo::mode_demo::~mode_demo()
 
 void neo::mode_demo::update()
 {
-    // Handle drop into serial mode
-    if (m_input.btn_select() && m_input.btn_down_changed()
-            && m_input.btn_down())
+    // OooooOOOoo!
+    if (m_secret_progress == 0 && m_input.btn_up_changed()
+            && m_input.btn_up(1))
     {
-        // Remove currently shown mode
+        m_secret_progress++;
+    }
+    else if (m_secret_progress == 1 && m_input.btn_up_changed()
+            && m_input.btn_up(1))
+    {
+        m_secret_progress++;
+    }
+    else if (m_secret_progress == 2 && m_input.btn_down_changed()
+            && m_input.btn_down(1))
+    {
+        m_secret_progress++;
+    }
+    else if (m_secret_progress == 3 && m_input.btn_down_changed()
+            && m_input.btn_down(1))
+    {
+        m_secret_progress++;
+    }
+    else if (m_secret_progress == 4 && m_input.btn_left_changed()
+            && m_input.btn_left(1))
+    {
+        m_secret_progress++;
+    }
+    else if (m_secret_progress == 5 && m_input.btn_right_changed()
+            && m_input.btn_right(1))
+    {
+        m_secret_progress++;
+    }
+    else if (m_secret_progress == 6 && m_input.btn_left_changed()
+            && m_input.btn_left(1))
+    {
+        m_secret_progress++;
+    }
+    else if (m_secret_progress == 7 && m_input.btn_right_changed()
+            && m_input.btn_right(1))
+    {
+        m_secret_progress++;
+    }
+    else if (m_secret_progress == 8 && m_input.btn_select_changed()
+            && m_input.btn_select(1))
+    {
+        // Remove currently shown submode
         if (m_submode)
             delete m_submode;
 
-        // Drop into serial mode
+        // Drop into egg submode
+        m_submode = new mode_egg(m_input, m_displays);
+
+        m_secret_progress = 0;
+    }
+
+    // Handle drop into serial mode
+    if (m_input.btn_select() && m_input.btn_left_changed()
+            && m_input.btn_left())
+    {
+        // Remove currently shown submode
+        if (m_submode)
+            delete m_submode;
+
+        // Drop into serial submode
         m_submode = new mode_serial(m_input, m_displays);
     }
 

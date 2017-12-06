@@ -24,7 +24,7 @@
 #include "display_pair.h"
 #include "input_ctrl.h"
 #include "mode.h"
-#include "mode_egg.h"
+#include "mode_demo.h"
 
 /**
  * Pin for the up directional button. Pulled up. Use a N/O switch to GND.
@@ -95,8 +95,7 @@ static neo::display_pair displays_g(display1_g, display2_g);
 void setup()
 {
     // Initialize demo mode for startup
-    // FIXME: SWITCH THIS BACK TO DEMO
-    current_mode_g = new neo::mode_egg(input_ctrl_g, displays_g);
+    current_mode_g = new neo::mode_demo(input_ctrl_g, displays_g);
 
     // Initialize NeoPixel instance and clear displays
     leds_g.begin();

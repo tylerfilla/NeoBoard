@@ -151,7 +151,7 @@ void neo::mode_serial::cmd_strings()
         }
 
         // Put given string
-        if (neo::string_store::put(text, strlen(text), index))
+        if (neo::string_store::put(text, m_line_buffer_len - (text - m_line_buffer), index))
         {
             Serial.println("ok");
         }
@@ -240,6 +240,10 @@ void neo::mode_serial::update()
             {
                 Serial.write(byte);
             }
+
+            // Don't buffer nonprintables
+            if (!isprint(byte))
+                return;
 
             // Read into line buffer if possible
             if (m_line_buffer_len < LINE_BUFFER_SIZE)

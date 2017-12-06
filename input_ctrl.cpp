@@ -20,9 +20,12 @@
 
 #include "input_ctrl.h"
 
-bool neo::input_ctrl::btn_up()
+bool neo::input_ctrl::btn_up(int skim)
 {
-    btn_up_changed_m = false;
+    if (!skim)
+    {
+        btn_up_changed_m = false;
+    }
     return btn_up_m;
 }
 
@@ -33,9 +36,12 @@ neo::input_ctrl& neo::input_ctrl::btn_up(bool btn_up_p)
     return *this;
 }
 
-bool neo::input_ctrl::btn_down()
+bool neo::input_ctrl::btn_down(int skim)
 {
-    btn_down_changed_m = false;
+    if (!skim)
+    {
+        btn_down_changed_m = false;
+    }
     return btn_down_m;
 }
 
@@ -46,9 +52,12 @@ neo::input_ctrl& neo::input_ctrl::btn_down(bool btn_down_p)
     return *this;
 }
 
-bool neo::input_ctrl::btn_left()
+bool neo::input_ctrl::btn_left(int skim)
 {
-    btn_left_changed_m = false;
+    if (!skim)
+    {
+        btn_left_changed_m = false;
+    }
     return btn_left_m;
 }
 
@@ -59,9 +68,12 @@ neo::input_ctrl& neo::input_ctrl::btn_left(bool btn_left_p)
     return *this;
 }
 
-bool neo::input_ctrl::btn_right()
+bool neo::input_ctrl::btn_right(int skim)
 {
-    btn_right_changed_m = false;
+    if (!skim)
+    {
+        btn_right_changed_m = false;
+    }
     return btn_right_m;
 }
 
@@ -72,9 +84,12 @@ neo::input_ctrl& neo::input_ctrl::btn_right(bool btn_right_p)
     return *this;
 }
 
-bool neo::input_ctrl::btn_select()
+bool neo::input_ctrl::btn_select(int skim)
 {
-    btn_select_changed_m = false;
+    if (!skim)
+    {
+        btn_select_changed_m = false;
+    }
     return btn_select_m;
 }
 

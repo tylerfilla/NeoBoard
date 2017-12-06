@@ -36,6 +36,11 @@ class mode_demo : public mode
      */
     mode* m_submode;
 
+    /**
+     * Progress to unlocking the secret. OooooOOOoo!
+     */
+    int m_secret_progress;
+
 public:
     mode_demo(input_ctrl& p_input, display_pair& p_displays);
 
