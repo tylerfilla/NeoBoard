@@ -26,13 +26,20 @@
 namespace neo
 {
 
+class mode_text;
+
 /**
  * A mode for introduction and friendly startups.
  */
 class mode_demo : public mode
 {
     /**
-     * The current mode being demoed at the moment.
+     * An accessible text mode.
+     */
+    mode_text& m_text;
+
+    /**
+     * The current submode being demoed at the moment.
      */
     mode* m_submode;
 
@@ -42,7 +49,8 @@ class mode_demo : public mode
     int m_secret_progress;
 
 public:
-    mode_demo(input_ctrl& p_input, display_pair& p_displays);
+    mode_demo(input_ctrl& p_input, display_pair& p_displays,
+            mode_text& m_text);
 
     ~mode_demo() override;
 

@@ -18,8 +18,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DISPLAY_NEOPIXELS_H
-#define DISPLAY_NEOPIXELS_H
+#ifndef CLOCK_H
+#define CLOCK_H
 
 namespace neo
 {
@@ -44,4 +44,4 @@ unsigned long delay_millis(unsigned long millis);
 
 } // namespace neo
 
-#endif // #ifndef DISPLAY_NEOPIXELS_H
+#endif // #ifndef CLOCK_H

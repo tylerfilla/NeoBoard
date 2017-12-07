@@ -861,4 +861,63 @@ void neo::mode_text::show_string(const char* str, size_t len)
     memcpy(m_text, str, len);
     m_text[len] = '\0';
     m_text_len = len;
+
+    // Leave edit mode
+    m_editing = false;
+}
+
+void neo::mode_text::reset()
+{
+    m_text_len = 0;
+    m_current_obfuscated_char = ' ';
+    m_current_rainbow_color_a = DEFAULT_COLOR_FG;
+    m_current_rainbow_color_b = DEFAULT_COLOR_FG;
+    m_current_rainbow_driver_hue = 0;
+    m_marquee_enable = false;
+    m_marquee_step = 0;
+    m_flash_state = false;
+    m_flash_timer = 0;
+    m_editing = false;
+    m_overtype = true;
+    m_edit_caret_pos = 0;
+    m_edit_caret_visible = true;
+    m_edit_caret_blink_timer = 0;
+    m_saved = true;
+    m_save_index = 0;
+
+    // Find first nonempty string
+    while (true)
+    {
+        load_string();
+
+        // Try next string
+        if (m_text_len == 0)
+        {
+            m_save_index++;
+
+            // If the end has been reached
+            if (m_save_index == neo::string_store::NUM_STRINGS - 1)
+            {
+                // Go to the first string
+                m_save_index = 0;
+
+                // Drop to edit mode, overtype
+                m_editing = true;
+                m_overtype = true;
+
+                // Stop here
+                break;
+            }
+            else
+            {
+                // Go to next string
+                continue;
+            }
+        }
+        else
+        {
+            // Stop here
+            break;
+        }
+    }
 }

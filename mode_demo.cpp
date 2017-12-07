@@ -26,11 +26,19 @@
 #include "mode_serial.h"
 #include "mode_text.h"
 
-neo::mode_demo::mode_demo(input_ctrl& p_input, display_pair& p_displays)
+// Flag indicating whether the demo should be kept alive
+// This is read by the main file
+bool g_keep_demo = false;
+
+neo::mode_demo::mode_demo(input_ctrl& p_input, display_pair& p_displays,
+        mode_text& p_text)
         : mode(p_input, p_displays)
-        , m_submode(new neo::mode_text(p_input, p_displays))
+        , m_text(p_text)
+        , m_submode(nullptr)
         , m_secret_progress(0)
 {
+    // Set up demo text
+    m_text.show_string("$sN$tE$sO$tB$sO$tA$sR$tD", 24);
 }
 
 neo::mode_demo::~mode_demo()
@@ -43,56 +51,59 @@ void neo::mode_demo::update()
 {
     // OooooOOOoo!
     if (m_secret_progress == 0 && m_input.btn_up_changed()
-            && m_input.btn_up(1))
+            && m_input.btn_up())
     {
         m_secret_progress++;
     }
     else if (m_secret_progress == 1 && m_input.btn_up_changed()
-            && m_input.btn_up(1))
+            && m_input.btn_up())
     {
         m_secret_progress++;
     }
     else if (m_secret_progress == 2 && m_input.btn_down_changed()
-            && m_input.btn_down(1))
+            && m_input.btn_down())
     {
         m_secret_progress++;
     }
     else if (m_secret_progress == 3 && m_input.btn_down_changed()
-            && m_input.btn_down(1))
+            && m_input.btn_down())
     {
         m_secret_progress++;
     }
     else if (m_secret_progress == 4 && m_input.btn_left_changed()
-            && m_input.btn_left(1))
+            && m_input.btn_left())
     {
         m_secret_progress++;
     }
     else if (m_secret_progress == 5 && m_input.btn_right_changed()
-            && m_input.btn_right(1))
+            && m_input.btn_right())
     {
         m_secret_progress++;
     }
     else if (m_secret_progress == 6 && m_input.btn_left_changed()
-            && m_input.btn_left(1))
+            && m_input.btn_left())
     {
         m_secret_progress++;
     }
     else if (m_secret_progress == 7 && m_input.btn_right_changed()
-            && m_input.btn_right(1))
+            && m_input.btn_right())
     {
         m_secret_progress++;
     }
     else if (m_secret_progress == 8 && m_input.btn_select_changed()
-            && m_input.btn_select(1))
+            && m_input.btn_select())
     {
         // Remove currently shown submode
         if (m_submode)
             delete m_submode;
 
         // Drop into egg submode
-        m_submode = new mode_egg(m_input, m_displays);
+        m_submode = new neo::mode_egg(m_input, m_displays);
 
         m_secret_progress = 0;
+
+        // Keep demo alive
+        g_keep_demo = true;
     }
 
     // Handle drop into serial mode
@@ -104,12 +115,20 @@ void neo::mode_demo::update()
             delete m_submode;
 
         // Drop into serial submode
-        m_submode = new mode_serial(m_input, m_displays);
+        m_submode = new neo::mode_serial(m_input, m_displays);
+
+        // Keep demo alive
+        g_keep_demo = true;
     }
 
-    // Forward update to backing mode
+    // Forward update to submode
     if (m_submode)
     {
         m_submode->update();
+    }
+    else
+    {
+        // Update text instead
+        m_text.update();
     }
 }

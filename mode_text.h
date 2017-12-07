@@ -184,6 +184,11 @@ public:
      * Show the given text string directly.
      */
     void show_string(const char* str, size_t len);
+
+    /**
+     * Reset the state of the text mode.
+     */
+    void reset();
 };
 
 } // namespace neo
