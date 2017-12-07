@@ -688,6 +688,7 @@ void neo::mode_text::update()
                 case 'r':
                 case 'R':
                     // Reset a bunch of stuff
+                    mode_flash = false;
                     mode_obfuscated = false;
                     color_bg = DEFAULT_COLOR_BG;
                     color_fg = DEFAULT_COLOR_FG;
